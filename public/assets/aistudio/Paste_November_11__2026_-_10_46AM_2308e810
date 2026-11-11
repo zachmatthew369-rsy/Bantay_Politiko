@@ -1,0 +1,1119 @@
+# MASTER ENGINEERING PROMPT
+# BANTAYPOLITIKO
+## Philippine Government Transparency, Public Accountability & Citizen Monitoring Platform
+
+**Tagline:** Tap at na Pamahalaan, Mas Magandang Bukas.
+
+**Project Type:** Premium Government Transparency & Civic Technology Web Application
+
+**Primary Objective:** Recreate the supplied BantayPolitiko reference screenshot as closely as possible, then transform it into a fully functional, responsive, interactive, real-time public accountability platform.
+
+---
+
+# PART 1 — PROJECT VISION
+
+Build BantayPolitiko, a comprehensive civic technology platform designed to help Filipino citizens monitor:
+
+1. Elected government officials and public servants.
+2. Government projects and their implementation status.
+3. Government budgets, expenditures, and allocations.
+4. Public infrastructure development.
+5. Public procurement and government contracts.
+6. Public sentiment and citizen feedback.
+7. Government performance and accountability.
+8. Potential irregularities, conflicts of interest, and corruption-related allegations supported by evidence.
+
+The platform must empower citizens to monitor government performance, examine publicly available records, report concerns, and participate in transparent civic discussions.
+
+The application must remain politically neutral, nonpartisan, evidence-based, and transparent.
+
+Do not automatically classify any politician as corrupt based on public sentiment, unverified accusations, political affiliation, or popularity.
+
+Distinguish allegations, investigations, official findings, court decisions, and dismissed cases.
+
+# PART 2 — VISUAL REFERENCE RECONSTRUCTION
+
+Treat the supplied screenshot as the primary visual specification.
+
+Recreate its layout, spacing, proportions, colors, typography, composition, and component placement as closely as possible.
+
+Do not reinterpret the design into a completely different dashboard.
+
+## 2.1 Overall Visual Identity
+
+Create a premium Philippine civic technology visual identity.
+
+Design characteristics:
+
+- Premium pearl-white interface.
+- Clean white and ice-blue backgrounds.
+- Philippine flag-inspired blue and red accents.
+- Golden yellow highlights inspired by the Philippine sun.
+- Modern government transparency aesthetic.
+- Professional typography.
+- Rounded dashboard cards.
+- Subtle glassmorphism.
+- Soft shadows.
+- Light blue gradients.
+- Premium iconography.
+- High-quality photographic imagery.
+- Subtle 3D depth and dimensional surfaces.
+
+Suggested colors:
+
+- Primary blue: #0757D9
+- Deep blue: #063A91
+- Sky blue: #56A8F5
+- Ice blue: #EAF4FF
+- Pearl white: #FFFFFF
+- Philippine gold: #F8B820
+- Philippine red: #DC3545
+- Success green: #13A66A
+- Warning orange: #F5A623
+- Text navy: #102A56
+
+The application must look trustworthy, sophisticated, modern, and professional.
+
+Avoid excessive neon, dark cyberpunk aesthetics, unnecessary gradients, and oversized animations.
+
+## 2.2 Navigation Header
+
+Recreate the screenshot's navigation header.
+
+Left section:
+- BantayPolitiko logo.
+- Philippine sun-inspired branding.
+- Tagline: Tap at na Pamahalaan, Mas Magandang Bukas.
+
+Center navigation:
+- Home
+- Politicians
+- Projects
+- Budget Tracker
+- Reports
+- About
+
+Right section:
+- Global search.
+- Language selector.
+- Login / Sign Up.
+- User profile when authenticated.
+
+Navigation requirements:
+- Sticky header.
+- Active navigation indicators.
+- Smooth transitions.
+- Responsive mobile navigation.
+- Search autocomplete.
+- Keyboard-accessible navigation.
+
+## 2.3 Hero Banner
+
+Recreate the screenshot's large Philippine-themed hero banner.
+
+Main heading:
+
+"Be the Change.
+Monitor. Vote. Make a Difference."
+
+Supporting description:
+
+"A transparent platform that tracks and evaluates Philippine politicians, their projects, budgets, and performance. Together, we can build a more transparent and accountable government."
+
+Primary buttons:
+
+- Explore Public Officials
+- Track Government Projects
+- View Public Spending
+
+Visual composition:
+- Philippine flag waving in the background.
+- Manila skyline.
+- Government architectural landmarks.
+- Philippine sun and stars.
+- Premium photographic environment.
+- Elegant blue sky.
+- Animated flag fabric.
+- Subtle camera movement.
+- Cinematic depth and atmospheric effects.
+
+Implement the Philippine flag animation using optimized 3D geometry or a vertex shader with realistic fabric deformation.
+
+The flag must have correct Philippine flag symbolism and proportions.
+
+Do not let animation interfere with text readability.
+
+## 2.4 National Statistics Bar
+
+Immediately below the hero section, create a wide floating statistics card.
+
+Display:
+
+1. Total Politicians Tracked.
+2. Total Projects Monitored.
+3. Total Budget Tracked.
+4. Total Citizen Responses.
+
+Each statistic must contain:
+- Large numerical value.
+- Relevant icon.
+- Growth or change indicator.
+- Descriptive label.
+- Animated counting effect.
+- Tooltip explaining the metric.
+- Last updated timestamp where applicable.
+
+Use GSAP number counter animations.
+
+All values must originate from the database or an explicitly labeled demonstration dataset.
+
+Never invent operational statistics.
+
+---
+
+# PART 3 — MAIN DASHBOARD LAYOUT
+
+Reproduce the reference screenshot's three-column dashboard composition.
+
+## 3.1 Featured Politician Card
+
+Create a featured politician profile card.
+
+Display:
+
+- Official portrait.
+- Full name.
+- Verified identity indicator.
+- Government position.
+- Province or jurisdiction.
+- Political affiliation, when sourced.
+- Current term.
+- Public office.
+- Relevant public records.
+
+Add a public sentiment interaction area.
+
+Citizen response options should include:
+
+- Supportive.
+- Concerned.
+- Undecided.
+
+Allow users to submit a reason or optional explanation.
+
+Display:
+
+- Total responses.
+- Sentiment distribution.
+- Sentiment history.
+- Date of latest update.
+- Geographic distribution where privacy thresholds permit.
+
+Important:
+
+Sentiment is an expression of public opinion, not proof of corruption or misconduct.
+
+Do not display a politician as "Corrupt" or "Not Corrupt" based on a citizen poll.
+
+Instead, create a separate evidence-based accountability and public-records section.
+
+## 3.2 Latest Government Projects
+
+Create a project monitoring card with a vertically scrollable project list.
+
+Each project must display:
+
+- Project thumbnail.
+- Project title.
+- Location.
+- Implementing agency.
+- Project budget.
+- Allocated amount.
+- Project completion percentage.
+- Project status.
+- Expected completion date.
+- Actual progress update.
+- Source of information.
+
+Project status categories:
+
+- Proposed.
+- Approved.
+- Procurement.
+- Awarded.
+- Ongoing.
+- Completed.
+- Delayed.
+- Suspended.
+- Cancelled.
+- Under Investigation.
+
+Use status-specific visual indicators.
+
+Progress bars must animate when visible.
+
+Clicking a project opens its full project profile.
+
+## 3.3 How It Works Card
+
+Create a simple citizen onboarding component with four steps:
+
+1. Find a Politician.
+2. View Their Profile.
+3. Check Projects & Budget.
+4. Share Your Opinion.
+
+Each step contains:
+- Icon.
+- Number.
+- Short explanation.
+- Navigation action.
+
+Include a primary button:
+
+"Start Monitoring Now"
+
+---
+
+# PART 4 — POLITICIAN MONITORING SYSTEM
+
+Build a complete Politician Directory.
+
+## 4.1 Politician Directory
+
+Support searching and filtering by:
+
+- Full name.
+- Position.
+- Province.
+- City or municipality.
+- Political party.
+- Government agency.
+- Current or former office.
+- Term of office.
+
+Include profiles for:
+- President.
+- Vice President.
+- Senators.
+- Members of Congress.
+- Governors.
+- Vice Governors.
+- Mayors.
+- Vice Mayors.
+- Provincial board members.
+- City and municipal councilors.
+- Other relevant public officials.
+
+Use official or properly licensed portraits.
+
+Do not invent politician biographies or public records.
+
+## 4.2 Politician Profile
+
+Each profile should have:
+
+- Biography.
+- Public office history.
+- Election and term information.
+- Publicly disclosed assets, liabilities, and net worth where legally available.
+- SALN records and links where lawfully accessible.
+- Public procurement relationships.
+- Associated government projects.
+- Public budget allocations.
+- Official investigations.
+- Court decisions.
+- Official administrative findings.
+- Verified news and public documents.
+- Citizen sentiment.
+
+Create an evidence timeline.
+
+Every allegation must include:
+- Description.
+- Original source.
+- Publication or filing date.
+- Current status.
+- Supporting documents.
+- Last verification date.
+
+Clearly distinguish unverified allegations from official findings.
+
+Provide a right-of-reply or correction mechanism for affected individuals.
+
+---
+
+# PART 5 — GOVERNMENT PROJECT MONITORING
+
+Build a comprehensive Government Project Monitoring Center.
+
+## 5.1 Project Directory
+
+Include project categories:
+
+- Roads and bridges.
+- Hospitals and healthcare.
+- Education and schools.
+- Flood control.
+- Water systems.
+- Public transportation.
+- Housing.
+- Agriculture.
+- Energy.
+- Telecommunications.
+- Public facilities.
+- Environmental programs.
+
+Filters:
+- Region.
+- Province.
+- City.
+- Municipality.
+- Agency.
+- Implementing office.
+- Project category.
+- Budget range.
+- Project status.
+- Fiscal year.
+
+## 5.2 Project Detail Page
+
+Display:
+
+- Project overview.
+- Project location.
+- Implementing agency.
+- Contracting agency.
+- Contractor.
+- Approved budget.
+- Contract amount.
+- Notice to proceed.
+- Project start date.
+- Expected completion.
+- Actual completion.
+- Physical progress.
+- Financial accomplishment.
+- Procurement information.
+- Public documentation.
+- Project photographs.
+- Inspection reports.
+- Project milestones.
+
+Include a chronological project history.
+
+## 5.3 Project Progress Verification
+
+Allow authorized contributors to upload:
+
+- Construction photographs.
+- Inspection reports.
+- Official progress reports.
+- Completion certificates.
+- Supporting documentation.
+
+Implement timestamped submissions and audit logs.
+
+Where possible, compare reported completion against documented progress.
+
+Never automatically conclude that a project is corrupt because it is delayed, over budget, or incomplete.
+
+Instead, flag discrepancies for further examination.
+
+---
+
+# PART 6 — GOVERNMENT BUDGET TRACKER
+
+Build a dedicated Budget Transparency Center.
+
+Include:
+
+- National budget.
+- Department budgets.
+- Regional allocations.
+- Provincial budgets.
+- City and municipal budgets.
+- Individual project allocations.
+- Approved versus actual expenditures.
+- Procurement amounts.
+- Contract variations.
+- Annual budget comparisons.
+
+Create interactive visualizations using Apache ECharts.
+
+Required visualizations:
+
+1. Budget allocation donut chart.
+2. Department spending bar chart.
+3. Annual spending comparison.
+4. Budget utilization chart.
+5. Project expenditure timeline.
+6. Geographic spending distribution.
+7. Planned versus actual expenditure.
+
+Every chart must support:
+- Hover tooltips.
+- Drill-down.
+- Date filters.
+- Export.
+- Source attribution.
+
+Support fiscal-year filtering.
+
+Clearly distinguish appropriations, obligations, disbursements, and actual expenditures.
+
+---
+
+# PART 7 — PUBLIC SENTIMENT ANALYTICS
+
+Create a dedicated Public Sentiment Monitoring Engine.
+
+This is one of the platform's most important components.
+
+## 7.1 Citizen Feedback
+
+Allow authenticated citizens to express:
+
+- Supportive.
+- Concerned.
+- Undecided.
+
+Allow optional written feedback.
+
+Implement:
+- One active response per user per defined polling period.
+- Response updates.
+- Rate limiting.
+- Duplicate detection.
+- Abuse reporting.
+- Moderation.
+- Anti-bot protection.
+
+Do not expose individual voters' identities publicly.
+
+## 7.2 Sentiment Dashboard
+
+Create:
+
+- Overall sentiment distribution.
+- Sentiment history.
+- Geographic sentiment map.
+- Sentiment by public office.
+- Sentiment by project.
+- Sentiment by policy topic.
+- Monthly and yearly trends.
+
+Use animated donut charts, bar charts, and line graphs.
+
+## 7.3 AI Sentiment Analysis
+
+Optionally integrate an AI-based sentiment classification engine.
+
+It may classify submitted public comments into:
+
+- Positive.
+- Negative.
+- Neutral.
+- Concerned.
+- Supportive.
+- Mixed.
+
+AI must never independently determine whether a politician is corrupt.
+
+Implement:
+- Language detection.
+- Filipino language support.
+- English support.
+- Taglish support.
+- Confidence scores.
+- Human moderation.
+- Explainable classifications.
+
+Clearly label automated classifications as AI-generated estimates.
+
+Never treat a sentiment score as a scientific measurement of the entire Filipino population.
+
+Disclose sampling limitations and response counts.
+
+Prevent coordinated manipulation and political brigading.
+
+---
+
+# PART 8 — CORRUPTION RISK AND ACCOUNTABILITY MONITORING
+
+Create an evidence-based Public Accountability Intelligence Center.
+
+This system must identify potential red flags using documented public information.
+
+## 8.1 Risk Indicators
+
+Monitor:
+
+- Unusual contract variations.
+- Repeated procurement awards.
+- Missing procurement documentation.
+- Unusual bid patterns.
+- Delayed projects.
+- Budget discrepancies.
+- Incomplete projects.
+- Duplicate project records.
+- Related-party disclosures where legally documented.
+- Official audit observations.
+- COA findings.
+- Official administrative investigations.
+- Court decisions.
+
+## 8.2 Risk Assessment
+
+Create a transparent risk indicator system.
+
+Suggested categories:
+
+- Informational.
+- Low Concern.
+- Moderate Concern.
+- High Concern.
+- Critical Concern.
+
+Every indicator must explain:
+- What was detected.
+- Why it matters.
+- Supporting evidence.
+- Data source.
+- Detection methodology.
+- Verification status.
+
+A risk indicator is not a finding of guilt.
+
+Do not use an opaque AI score to label people corrupt.
+
+Allow authorized reviewers to validate, dismiss, or escalate findings.
+
+Maintain an immutable audit trail of material changes.
+
+---
+
+# PART 9 — PHILIPPINES INTERACTIVE MAP
+
+Create a dedicated Philippines geographic visualization.
+
+Use MapLibre GL with official geographic boundary datasets.
+
+Include:
+
+- Luzon.
+- Visayas.
+- Mindanao.
+- National regions.
+- Provinces.
+- Cities.
+- Municipalities.
+
+Map interactions:
+
+- Hover over a province.
+- Click a province.
+- Zoom into a region.
+- Display project locations.
+- Display government facilities.
+- Show budget distribution.
+- Show project completion.
+- Display available public sentiment statistics.
+- Filter by project category.
+
+Create animated map markers.
+
+Add a premium 3D map mode using Three.js.
+
+The map must remain accurate and geographically grounded.
+
+Use proper geographic coordinates and official administrative boundaries.
+
+Do not invent project locations.
+
+---
+
+# PART 10 — NATIONAL TRANSPARENCY OVERVIEW
+
+Recreate the bottom section of the reference screenshot.
+
+Create four project status cards:
+
+- Completed.
+- In Progress.
+- Pending.
+- Delayed.
+
+Each card must contain:
+- Count.
+- Percentage.
+- Icon.
+- Animated numerical counter.
+
+Beside it, create Projects by Sector.
+
+Categories:
+- Infrastructure.
+- Health.
+- Education.
+- Agriculture.
+- Others.
+
+Use animated vertical bar charts.
+
+Every statistic must be calculated from actual records or labeled sample data.
+
+---
+
+# PART 11 — 3D AND WEBGL EXPERIENCE
+
+Use Three.js, React Three Fiber, Drei, GSAP, and GLSL to enhance the experience.
+
+## 11.1 Hero 3D Environment
+
+Create a premium 3D Philippine urban environment.
+
+Include:
+- Manila skyline.
+- Government buildings.
+- Philippine landmarks.
+- Subtle atmospheric clouds.
+- Philippine flag.
+- Floating geographic indicators.
+
+The 3D environment must resemble the supplied reference image.
+
+## 11.2 Interactive 3D Philippine Map
+
+Create an optional 3D Philippine archipelago visualization.
+
+Requirements:
+- Realistic geographic silhouette.
+- Extruded terrain.
+- Subtle blue and gold lighting.
+- Province selection.
+- Glowing project markers.
+- Animated geographic connections.
+- Smooth camera transitions.
+
+Use real geographic source data.
+
+## 11.3 GSAP Animation System
+
+Implement coordinated animation timelines.
+
+Required animations:
+
+- Hero cinematic entrance.
+- Philippine flag waving.
+- Navigation transitions.
+- Floating statistic counters.
+- Card reveal animations.
+- Animated progress bars.
+- Chart drawing.
+- Map marker pulses.
+- Scroll-triggered animations.
+- Project detail transitions.
+- Dashboard loading transitions.
+- Smooth modal opening and closing.
+
+Use GSAP ScrollTrigger where appropriate.
+
+Animations must be subtle, purposeful, and optimized.
+
+## 11.4 Advanced WebGL Effects
+
+Implement selective GLSL shaders:
+
+- Philippine flag fabric deformation.
+- Atmospheric lighting.
+- Subtle water and sky effects.
+- Glowing project markers.
+- Animated geographic connections.
+- Soft holographic accents.
+
+Use post-processing only where visually justified.
+
+Do not sacrifice readability or performance.
+
+---
+
+# PART 12 — REPORTING AND PUBLIC DOCUMENTATION
+
+Create a Report Center.
+
+Allow users to browse and download:
+
+- Politician performance reports.
+- Project monitoring reports.
+- Budget utilization reports.
+- Procurement monitoring reports.
+- COA audit report references.
+- Citizen sentiment reports.
+- Public accountability reports.
+
+Support:
+- PDF export.
+- CSV export.
+- Excel export.
+- Date-range filtering.
+- Source references.
+- Report generation timestamps.
+
+Reports must include methodology, limitations, source references, and relevant disclaimers.
+
+Allow citizens to submit documented concerns.
+
+Create a structured reporting process:
+
+1. Select the subject.
+2. Describe the concern.
+3. Attach supporting documents.
+4. Provide source references.
+5. Submit for moderation.
+6. Track review status.
+
+Protect whistleblowers and confidential personal information.
+
+Do not publicly expose unverified submissions.
+
+---
+
+# PART 13 — USER AUTHENTICATION AND ROLES
+
+Use Supabase Auth.
+
+Roles:
+
+1. Public Visitor.
+2. Registered Citizen.
+3. Verified Contributor.
+4. Moderator.
+5. Researcher.
+6. Data Analyst.
+7. Administrator.
+
+Implement:
+- Email authentication.
+- Optional social login.
+- Secure session management.
+- Role-based access control.
+- Row-level security.
+- Account recovery.
+- Profile management.
+- User activity history.
+
+Sensitive administrative operations must require appropriate authorization.
+
+---
+
+# PART 14 — DATA SOURCES AND API INTEGRATION
+
+Integrate authoritative and publicly available Philippine information.
+
+Potential sources include:
+
+- Commission on Audit (COA).
+- Department of Budget and Management (DBM).
+- Philippine Government Electronic Procurement System (PhilGEPS).
+- Department of Public Works and Highways (DPWH).
+- Philippine Statistics Authority (PSA).
+- Official Gazette.
+- House of Representatives.
+- Senate of the Philippines.
+- Department of Finance.
+- Local government official portals.
+- Official agency procurement and project reports.
+
+Use official APIs where available.
+
+Where APIs do not exist, implement controlled document ingestion and source linking, respecting website terms and access restrictions.
+
+Create a source registry.
+
+Every imported record should store:
+
+- Source organization.
+- Original source URL.
+- Source document identifier.
+- Retrieval timestamp.
+- Publication date.
+- Data version.
+- Verification status.
+- Last synchronization.
+
+Do not claim that a source is connected when it is not.
+
+Do not silently replace unavailable data with fabricated statistics.
+
+---
+
+# PART 15 — DATABASE ARCHITECTURE
+
+Use PostgreSQL and Supabase.
+
+Recommended database entities:
+
+- users
+- user_profiles
+- politicians
+- politician_terms
+- government_agencies
+- government_projects
+- project_milestones
+- project_progress_updates
+- project_locations
+- government_budgets
+- budget_allocations
+- procurement_contracts
+- procurement_bids
+- contractors
+- public_documents
+- official_findings
+- investigations
+- allegations
+- citizen_sentiment
+- citizen_feedback
+- sentiment_aggregates
+- accountability_indicators
+- reports
+- source_registry
+- data_import_jobs
+- moderation_queue
+- audit_logs
+
+Use PostGIS for geographic data.
+
+Establish foreign keys, indexing, constraints, and database migrations.
+
+Maintain complete provenance for public records.
+
+Never store unnecessary sensitive personal information.
+
+---
+
+# PART 16 — REALTIME ARCHITECTURE
+
+Use Supabase Realtime, SSE, or WebSockets.
+
+Support live updates for:
+
+- Project progress.
+- Budget data changes.
+- New official records.
+- Citizen feedback aggregates.
+- Moderation status.
+- Data ingestion status.
+- Newly published reports.
+
+Use actual backend events.
+
+Do not use random timers to simulate real operational updates.
+
+When a live source is unavailable, display the last verified update timestamp.
+
+---
+
+# PART 17 — UI/UX AND RESPONSIVENESS
+
+The design must reproduce the reference layout on desktop.
+
+Desktop:
+- Full-width navigation.
+- Large hero banner.
+- Four-column statistics bar.
+- Three-column main dashboard.
+- Two-column transparency overview.
+
+Tablet:
+- Responsive card rearrangement.
+- Compact navigation.
+- Optimized charts.
+
+Mobile:
+- Mobile navigation.
+- Stacked cards.
+- Touch-friendly controls.
+- Responsive maps.
+- Mobile-optimized politician profiles.
+- Simplified charts.
+
+Implement light mode as the primary theme.
+
+An optional dark mode may be added later, but must not compromise the reference design.
+
+---
+
+# PART 18 — SECURITY, PRIVACY, AND PLATFORM INTEGRITY
+
+Implement:
+
+- Supabase Row Level Security.
+- Input validation.
+- Output encoding.
+- CSRF protection where applicable.
+- Rate limiting.
+- Secure file uploads.
+- File type validation.
+- Malware scanning where available.
+- Audit logging.
+- Authentication security.
+- Authorization checks.
+- Abuse prevention.
+- Anti-bot mechanisms.
+- Data retention policies.
+- Backup and recovery.
+
+Apply Philippine Data Privacy Act of 2012 requirements where applicable.
+
+Ensure the platform does not become a tool for harassment, doxxing, political manipulation, or defamation.
+
+Implement:
+- Right to correction.
+- Right of reply.
+- Clear source attribution.
+- Evidence verification.
+- Moderation appeals.
+- Transparent content policies.
+
+Keep citizen identities private in public sentiment reporting.
+
+---
+
+# PART 19 — PERFORMANCE AND OPTIMIZATION
+
+Target:
+
+- Fast initial page load.
+- Smooth 60 FPS on capable desktop hardware.
+- Optimized WebGL rendering.
+- Responsive interactions.
+- Lazy-loaded images and models.
+- Efficient database queries.
+- Cached geographic assets.
+- Optimized charts.
+- Instanced 3D objects.
+- Frustum culling.
+- Proper memory disposal.
+- Reduced motion accessibility support.
+
+Provide graceful fallback when WebGL is unavailable.
+
+Avoid rendering the entire 3D environment on mobile if performance would suffer.
+
+---
+
+# PART 20 — DEVELOPMENT AND IMPLEMENTATION WORKFLOW
+
+Before modifying anything:
+
+1. Inspect the existing repository.
+2. Identify the framework and current architecture.
+3. Identify existing dependencies.
+4. Inspect existing database structures.
+5. Identify reusable components.
+6. Review existing authentication and API integrations.
+7. Prepare an implementation plan.
+
+Do not unnecessarily replace working infrastructure.
+
+Build incrementally.
+
+Suggested development phases:
+
+PHASE 1 — Reference UI Reconstruction
+- Header.
+- Hero.
+- Statistics.
+- Featured politician.
+- Latest projects.
+- How It Works.
+- Transparency overview.
+- Philippine map.
+
+PHASE 2 — 3D and Animation
+- Three.js environment.
+- Philippine flag.
+- GSAP animations.
+- Interactive map.
+- Animated dashboard components.
+
+PHASE 3 — Backend and Database
+- Supabase integration.
+- Authentication.
+- Database schema.
+- RLS.
+- API architecture.
+
+PHASE 4 — Monitoring Systems
+- Politician directory.
+- Project monitoring.
+- Budget tracker.
+- Procurement tracking.
+- Public sentiment.
+
+PHASE 5 — Accountability Intelligence
+- Public-record ingestion.
+- Evidence management.
+- Risk indicators.
+- Verification workflow.
+- Reporting center.
+
+PHASE 6 — Testing and Optimization
+- Functional tests.
+- Security tests.
+- Performance testing.
+- Responsive testing.
+- Data validation.
+- Browser compatibility.
+
+---
+
+# PART 21 — FINAL ACCEPTANCE CRITERIA
+
+The project is not complete until all of the following are satisfied:
+
+1. The homepage closely reproduces the supplied screenshot.
+2. The visual hierarchy and component placement match the reference.
+3. The Philippine flag has realistic movement.
+4. The hero environment includes polished visual depth.
+5. The dashboard cards are functional.
+6. Politician profiles load real or clearly labeled demonstration records.
+7. Project monitoring works.
+8. Budget tracking works.
+9. Sentiment submissions are stored securely.
+10. Sentiment analytics calculate actual submitted responses.
+11. Philippine maps support geographic interactions.
+12. Public records have traceable sources.
+13. Accountability indicators have documented explanations.
+14. Administrative moderation works.
+15. Authentication and authorization work.
+16. Realtime functionality uses actual backend events.
+17. All responsive layouts work.
+18. Animations are smooth and accessible.
+19. No fabricated statistics are presented as real.
+20. No unverified accusations are presented as established facts.
+21. No critical TypeScript, runtime, or database errors remain.
+
+## FINAL DIRECTIVE
+
+Build BantayPolitiko as a premium, production-quality Philippine civic technology platform.
+
+Prioritize visual fidelity to the uploaded reference image, professional UI/UX, functional monitoring capabilities, evidence-based accountability, data integrity, and excellent performance.
+
+Do not deliver only a static dashboard mockup.
+
+Do not substitute screenshots for functional components.
+
+Do not simulate database functionality using hardcoded arrays in production.
+
+Do not use fabricated real-world politician profiles, accusations, government project records, or financial statistics.
+
+If actual integrations are not available, provide clearly labeled demonstration data and document what remains to be connected.
+
+The final result should feel like a world-class public transparency platform that Filipino citizens can use to monitor government performance, examine public spending, follow infrastructure projects, and participate responsibly in democratic accountability.
+
+**BANTAYPOLITIKO**
+
+**Tap at na Pamahalaan, Mas Magandang Bukas.**
+
+**Transparency. Accountability. Citizen Empowerment.**

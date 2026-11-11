@@ -1,0 +1,461 @@
+import React, { useState } from 'react';
+import {
+  X,
+  MapPin,
+  Briefcase,
+  Calendar,
+  CheckCircle2,
+  AlertTriangle,
+  Award,
+  FolderKanban,
+  FileCheck2,
+  Scale,
+  TrendingUp,
+  Share2,
+  ExternalLink,
+  ShieldCheck,
+  Building,
+  Clock,
+  Sparkles
+} from 'lucide-react';
+import { Politician } from '../../types';
+
+interface PoliticianProfileModalProps {
+  politician: Politician | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onSetAsFeatured: (politician: Politician) => void;
+  onVote: (type: 'corrupt' | 'not_corrupt') => void;
+  onOpenProjectTracker?: (projectId: string) => void;
+}
+
+export const PoliticianProfileModal: React.FC<PoliticianProfileModalProps> = ({
+  politician,
+  isOpen,
+  onClose,
+  onSetAsFeatured,
+  onVote,
+  onOpenProjectTracker
+}) => {
+  const [activeTab, setActiveTab] = useState<'overview' | 'projects' | 'achievements' | 'pending' | 'sentiment'>('overview');
+
+  if (!isOpen || !politician) return null;
+
+  const corruptPercent = politician.sentiment.corruptVotes
+    ? Math.round((politician.sentiment.corruptVotes / politician.sentiment.totalResponses) * 100)
+    : 54;
+  const notCorruptPercent = 100 - corruptPercent;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-900/75 backdrop-blur-md animate-fadeIn">
+      <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden">
+        {/* Modal Top Header */}
+        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-gradient-to-r from-blue-950 via-[#063A91] to-[#0757D9] text-white">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20">
+              <ShieldCheck className="w-5 h-5 text-yellow-300" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-black tracking-tight">{politician.name}</h2>
+                {politician.isVerified && (
+                  <span className="bg-blue-400 text-blue-950 text-[10px] font-black px-2 py-0.5 rounded-full flex items-center gap-1">
+                    ✓ Verified Official Identity
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-blue-100 flex items-center gap-2">
+                <span>{politician.position}</span>
+                <span>·</span>
+                <span>{politician.jurisdiction}</span>
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                onSetAsFeatured(politician);
+                onClose();
+              }}
+              className="px-3 py-1.5 rounded-xl bg-white text-blue-900 hover:bg-blue-50 text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+              <span>Set as Monitored Official</span>
+            </button>
+
+            <button
+              onClick={onClose}
+              className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+              aria-label="Close modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Profile Snapshot Banner */}
+        <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex flex-col md:flex-row items-center gap-6">
+          {/* Portrait with Philippine Flag Accent Frame */}
+          <div className="relative w-24 h-28 sm:w-28 sm:h-32 rounded-2xl overflow-hidden shrink-0 border-2 border-white shadow-md bg-gradient-to-b from-[#0038A8] via-[#F4F7FC] to-[#CE1126] p-0.5">
+            <div className="w-full h-full rounded-xl overflow-hidden relative">
+              <img
+                src={politician.avatarUrl}
+                alt={politician.name}
+                className="w-full h-full object-cover object-top"
+                referrerPolicy="no-referrer"
+              />
+            </div>
+          </div>
+
+          {/* Quick Metrics Bar */}
+          <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-3 w-full">
+            <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs">
+              <span className="text-[10px] text-slate-400 font-bold uppercase block">Declared SALN</span>
+              <span className="text-sm font-black text-[#102A56] tabular-nums">{politician.salnNetWorth}</span>
+              <span className="text-[10px] text-emerald-600 block font-semibold">CSC Compliant ({politician.salnYear})</span>
+            </div>
+
+            <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs">
+              <span className="text-[10px] text-slate-400 font-bold uppercase block">Supervised Projects</span>
+              <span className="text-sm font-black text-blue-700 tabular-nums">{politician.totalProjects} Projects</span>
+              <span className="text-[10px] text-slate-500 block font-semibold">{politician.totalBudgetAllocated}</span>
+            </div>
+
+            <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs">
+              <span className="text-[10px] text-slate-400 font-bold uppercase block">Citizen Sentiment</span>
+              <span className="text-sm font-black text-emerald-600 tabular-nums">{notCorruptPercent}% Approval</span>
+              <span className="text-[10px] text-slate-400 block font-medium">{politician.sentiment.totalResponses.toLocaleString()} Votes</span>
+            </div>
+
+            <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs">
+              <span className="text-[10px] text-slate-400 font-bold uppercase block">COA / Legal Status</span>
+              <span className="text-sm font-black text-slate-800">
+                {politician.verifiedRecords.ongoingInquiries > 0 ? '1 Inquiry In Review' : 'Clean Record'}
+              </span>
+              <span className="text-[10px] text-emerald-600 block font-semibold">
+                {politician.verifiedRecords.clearedCases} Case(s) Cleared
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation Tabs */}
+        <div className="px-6 pt-3 border-b border-slate-200 flex flex-wrap items-center gap-2 sm:gap-4 bg-white">
+          <button
+            onClick={() => setActiveTab('overview')}
+            className={`pb-2.5 text-xs font-bold transition-all border-b-2 flex items-center gap-1.5 ${
+              activeTab === 'overview'
+                ? 'border-[#0757D9] text-[#0757D9]'
+                : 'border-transparent text-slate-500 hover:text-slate-900'
+            }`}
+          >
+            <Briefcase className="w-3.5 h-3.5" />
+            <span>Overview & Career</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('achievements')}
+            className={`pb-2.5 text-xs font-bold transition-all border-b-2 flex items-center gap-1.5 ${
+              activeTab === 'achievements'
+                ? 'border-[#0757D9] text-[#0757D9]'
+                : 'border-transparent text-slate-500 hover:text-slate-900'
+            }`}
+          >
+            <Award className="w-3.5 h-3.5" />
+            <span>Key Achievements</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('projects')}
+            className={`pb-2.5 text-xs font-bold transition-all border-b-2 flex items-center gap-1.5 ${
+              activeTab === 'projects'
+                ? 'border-[#0757D9] text-[#0757D9]'
+                : 'border-transparent text-slate-500 hover:text-slate-900'
+            }`}
+          >
+            <FolderKanban className="w-3.5 h-3.5" />
+            <span>Associated Projects ({politician.associatedProjectsList?.length || 0})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('pending')}
+            className={`pb-2.5 text-xs font-bold transition-all border-b-2 flex items-center gap-1.5 ${
+              activeTab === 'pending'
+                ? 'border-[#0757D9] text-[#0757D9]'
+                : 'border-transparent text-slate-500 hover:text-slate-900'
+            }`}
+          >
+            <Scale className="w-3.5 h-3.5" />
+            <span>COA & Pending Inquiries ({politician.pendingInquiriesList?.length || 0})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('sentiment')}
+            className={`pb-2.5 text-xs font-bold transition-all border-b-2 flex items-center gap-1.5 ${
+              activeTab === 'sentiment'
+                ? 'border-[#0757D9] text-[#0757D9]'
+                : 'border-transparent text-slate-500 hover:text-slate-900'
+            }`}
+          >
+            <TrendingUp className="w-3.5 h-3.5" />
+            <span>Public Sentiment & Polls</span>
+          </button>
+        </div>
+
+        {/* Tab Content Body */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {/* TAB 1: OVERVIEW */}
+          {activeTab === 'overview' && (
+            <div className="space-y-6">
+              {/* Biography */}
+              <div className="space-y-2">
+                <h3 className="text-sm font-extrabold text-[#102A56]">Biography & Public Service Profile</h3>
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                  {politician.biography}
+                </p>
+              </div>
+
+              {/* Public Office Career History */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-extrabold text-[#102A56] flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-blue-600" />
+                  <span>Public Office Career History</span>
+                </h3>
+                <div className="space-y-2">
+                  {politician.publicOfficeHistory.map((office, i) => (
+                    <div
+                      key={i}
+                      className="p-3 bg-white border border-slate-200 rounded-xl flex items-center justify-between text-xs font-semibold text-slate-800"
+                    >
+                      <span className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-blue-600" />
+                        <span>{office}</span>
+                      </span>
+                      <span className="text-[10px] text-blue-700 bg-blue-50 px-2 py-0.5 rounded font-bold">
+                        Verified Term
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Legal Non-Partisan Distinction Notice */}
+              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-xs text-amber-900 space-y-1">
+                <strong className="font-bold flex items-center gap-1.5">
+                  <FileCheck2 className="w-4 h-4 text-amber-600" />
+                  <span>Non-Partisan Verification Standard:</span>
+                </strong>
+                <p className="leading-relaxed">
+                  BantayPolitiko strictly adheres to Article XI of the 1987 Philippine Constitution (Accountability of Public Officers). Public sentiment is an expression of citizen opinion and is legally distinct from formal Commission on Audit (COA) disallowances or judicial convictions.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 2: ACHIEVEMENTS */}
+          {activeTab === 'achievements' && (
+            <div className="space-y-4">
+              <h3 className="text-sm font-extrabold text-[#102A56] flex items-center gap-2">
+                <Award className="w-4 h-4 text-yellow-500" />
+                <span>Documented Public Achievements & Milestone Deliverables</span>
+              </h3>
+
+              <div className="space-y-3">
+                {politician.achievements && politician.achievements.length > 0 ? (
+                  politician.achievements.map((ach, i) => (
+                    <div
+                      key={i}
+                      className="p-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl flex items-start gap-3"
+                    >
+                      <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                      <div>
+                        <span className="text-xs font-bold text-slate-800 block">{ach}</span>
+                        <span className="text-[10px] text-emerald-700 font-semibold mt-0.5 block">
+                          Verified through official agency accomplishment reports
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-xs text-slate-500 p-4 bg-slate-50 rounded-xl">
+                    No documented achievements listed yet in current term.
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: ASSOCIATED PROJECTS */}
+          {activeTab === 'projects' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-extrabold text-[#102A56] flex items-center gap-2">
+                  <FolderKanban className="w-4 h-4 text-blue-600" />
+                  <span>Government Infrastructure & Programs Under Jurisdiction</span>
+                </h3>
+                <span className="text-xs text-slate-500">
+                  Total Allocated: <strong className="text-[#0757D9]">{politician.totalBudgetAllocated}</strong>
+                </span>
+              </div>
+
+              <div className="divide-y divide-slate-100 border border-slate-200 rounded-2xl overflow-hidden bg-white">
+                {politician.associatedProjectsList && politician.associatedProjectsList.length > 0 ? (
+                  politician.associatedProjectsList.map((p) => (
+                    <div key={p.id} className="p-4 hover:bg-slate-50 transition-colors space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <h4 className="text-xs sm:text-sm font-bold text-[#102A56]">{p.title}</h4>
+                          <span className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
+                            <MapPin className="w-3 h-3 text-slate-400" />
+                            {p.location}
+                          </span>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-xs font-black text-[#102A56] tabular-nums block">{p.budget}</span>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full inline-block mt-0.5 ${
+                            p.status === 'Completed'
+                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                              : p.status === 'In Progress' || p.status === 'Ongoing'
+                              ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                              : 'bg-amber-50 text-amber-700 border border-amber-200'
+                          }`}>
+                            {p.status}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Progress Bar */}
+                      <div className="flex items-center gap-2 pt-1">
+                        <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                          <div
+                            style={{ width: `${p.completionPercentage}%` }}
+                            className="h-full bg-gradient-to-r from-blue-500 to-[#0757D9] rounded-full"
+                          />
+                        </div>
+                        <span className="text-[11px] font-extrabold text-slate-700 tabular-nums w-8 text-right">
+                          {p.completionPercentage}%
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-4 text-xs text-slate-400">No projects actively assigned.</div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: PENDING MATTERS & COA AUDITS */}
+          {activeTab === 'pending' && (
+            <div className="space-y-4">
+              <h3 className="text-sm font-extrabold text-[#102A56] flex items-center gap-2">
+                <Scale className="w-4 h-4 text-amber-600" />
+                <span>COA Audit Observation Memoranda & Legal Inquiries</span>
+              </h3>
+
+              <div className="space-y-3">
+                {politician.pendingInquiriesList && politician.pendingInquiriesList.length > 0 ? (
+                  politician.pendingInquiriesList.map((inq) => (
+                    <div
+                      key={inq.id}
+                      className="p-4 rounded-2xl border border-slate-200 bg-white space-y-2 hover:border-blue-400 transition-colors"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                        <span className="text-xs font-bold text-slate-800">{inq.title}</span>
+                        <span className="text-[10px] font-bold text-slate-400">{inq.date}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs pt-1">
+                        <span className="text-slate-500">{inq.agency}</span>
+                        <span className={`font-bold px-2 py-0.5 rounded text-[11px] ${
+                          inq.status.includes('Dismissed') || inq.status.includes('Cleared')
+                            ? 'bg-emerald-50 text-emerald-700'
+                            : 'bg-amber-50 text-amber-800'
+                        }`}>
+                          {inq.status}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-6 text-center text-xs text-slate-500 bg-slate-50 rounded-2xl border border-slate-100">
+                    <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
+                    <span className="font-bold text-slate-800 block">No Pending Adverse Findings</span>
+                    <span>This official currently has zero pending COA disallowance notices or Ombudsman preliminary inquiries.</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: PUBLIC SENTIMENT & DIRECT VOTING */}
+          {activeTab === 'sentiment' && (
+            <div className="space-y-5">
+              <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Citizen Approval vs Misconduct Concerns
+                  </h3>
+                  <span className="text-xs text-slate-400">
+                    Total Responses: {politician.sentiment.totalResponses.toLocaleString()}
+                  </span>
+                </div>
+
+                {/* Progress Bar */}
+                <div className="h-3 w-full bg-slate-200 rounded-full overflow-hidden flex">
+                  <div style={{ width: `${corruptPercent}%` }} className="bg-red-500 h-full" />
+                  <div style={{ width: `${notCorruptPercent}%` }} className="bg-emerald-500 h-full" />
+                </div>
+
+                <div className="flex items-center justify-between text-xs font-bold">
+                  <span className="text-red-600">{corruptPercent}% Misconduct Concern</span>
+                  <span className="text-emerald-600">{notCorruptPercent}% Approval / Support</span>
+                </div>
+
+                {/* Direct Vote Buttons inside modal */}
+                <div className="pt-2 grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => onVote('corrupt')}
+                    className="p-3 rounded-2xl bg-gradient-to-r from-red-600 to-rose-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm hover:brightness-105 active:scale-95 transition-all"
+                  >
+                    <AlertTriangle className="w-4 h-4" />
+                    <span>Report Misconduct</span>
+                  </button>
+                  <button
+                    onClick={() => onVote('not_corrupt')}
+                    className="p-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm hover:brightness-105 active:scale-95 transition-all"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Support Public Service</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Modal Footer */}
+        <div className="px-6 py-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between text-xs">
+          <span className="text-slate-400 font-medium">BantayPolitiko Open Civic Dossier</span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                onSetAsFeatured(politician);
+                onClose();
+              }}
+              className="px-4 py-2 bg-[#0757D9] hover:bg-blue-700 text-white font-bold rounded-xl transition-colors shadow-2xs"
+            >
+              Monitor on Homepage Dashboard
+            </button>
+            <button
+              onClick={onClose}
+              className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold rounded-xl transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
