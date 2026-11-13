@@ -16,6 +16,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { PhilippineSunLogo } from './PhilippineSunLogo';
+import { Politician } from '../types';
 
 interface NavbarProps {
   activeTab: string;
@@ -25,6 +26,7 @@ interface NavbarProps {
   lang: 'EN' | 'FIL';
   onToggleLang: () => void;
   onOpenAIAssistant?: () => void;
+  politicians?: Politician[];
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -34,24 +36,48 @@ export const Navbar: React.FC<NavbarProps> = ({
   onSearchSelect,
   lang,
   onToggleLang,
-  onOpenAIAssistant
+  onOpenAIAssistant,
+  politicians = []
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
 
-  // Quick suggestions for search autocomplete
-  const suggestions = [
-    { type: 'Politician', name: 'Hon. Juan Dela Cruz', sub: 'Governor, Cebu' },
+  const projectAndAgencyItems = [
     { type: 'Project', name: 'Cebu Provincial Hospital Expansion', sub: '₱450M · Health' },
     { type: 'Project', name: 'Rural Road Improvement Project', sub: '₱1.12B · Danao' },
     { type: 'Location', name: 'Cebu Province', sub: '742 Projects' },
     { type: 'Agency', name: 'DPWH - Department of Public Works', sub: 'National Infra' }
-  ].filter(
-    (item) =>
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.sub.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ];
+
+  const q = searchQuery.toLowerCase().trim();
+  const matchedPols = q
+    ? politicians
+        .filter(
+          (p) =>
+            p.name.toLowerCase().includes(q) ||
+            p.position.toLowerCase().includes(q) ||
+            p.jurisdiction.toLowerCase().includes(q)
+        )
+        .slice(0, 6)
+        .map((p) => ({
+          type: p.roleCategory,
+          name: p.name,
+          sub: `${p.position} · ${p.jurisdiction}`
+        }))
+    : [
+        { type: 'President', name: 'H.E. Ferdinand R. Marcos Jr.', sub: 'President of the Philippines' },
+        { type: 'Governor', name: 'Hon. Pamela "Pam" Baricuatro', sub: 'Governor, Province of Cebu' },
+        { type: 'Senator', name: 'Sen. Sherwin T. Gatchalian', sub: 'Senate President · 20th Congress' },
+        { type: 'Mayor', name: 'Hon. Francisco "Isko Moreno" Domagoso', sub: 'Mayor, City of Manila' }
+      ];
+
+  const suggestions = [
+    ...matchedPols,
+    ...projectAndAgencyItems.filter(
+      (item) => !q || item.name.toLowerCase().includes(q) || item.sub.toLowerCase().includes(q)
+    )
+  ].slice(0, 7);
 
   const navItems = [
     { id: 'home', label: lang === 'EN' ? 'Home' : 'Tahanan', icon: Home },

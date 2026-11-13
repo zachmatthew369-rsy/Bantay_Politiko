@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Navbar } from './components/Navbar';
 import { HeroBanner } from './components/HeroBanner';
 import { StatsBar } from './components/StatsBar';
@@ -24,9 +24,11 @@ import { PublicSpendingModal } from './components/modals/PublicSpendingModal';
 import { AccountabilityTimelineModal } from './components/modals/AccountabilityTimelineModal';
 import { CivicAuthModal } from './components/modals/CivicAuthModal';
 import { PoliticianProfileModal } from './components/modals/PoliticianProfileModal';
+import { VoterSecurityGateModal } from './components/modals/VoterSecurityGateModal';
 import { BantayAIAssistant } from './components/assistant/BantayAIAssistant';
 import { FloatingAITrigger } from './components/assistant/FloatingAITrigger';
 import { ArchipelagoType } from './components/modals/Interactive3DMapModal';
+import { useSentimentStream, VoteChoice } from './hooks/useSentimentStream';
 
 // Dedicated Sub-Views
 import { PoliticiansView } from './components/views/PoliticiansView';
@@ -60,41 +62,151 @@ export default function App() {
   const [preselectedPoliticianForAI, setPreselectedPoliticianForAI] = useState<string | undefined>(undefined);
   const [selectedPoliticianForProfile, setSelectedPoliticianForProfile] = useState<Politician | null>(null);
 
-  // Politician state with dynamic voting response updates
+  // Politician directory state hydrated from Scrapling backend (/api/politicians)
+  const [politicians, setPoliticians] = useState<Politician[]>([FEATURED_POLITICIAN, ...OTHER_POLITICIANS]);
+  const [countsByRole, setCountsByRole] = useState<Record<string, number>>({});
+  const [lastSyncedAt, setLastSyncedAt] = useState<string>('');
+  const [sourceStatuses, setSourceStatuses] = useState<Record<string, any>>({});
+  const [isSyncingScraper, setIsSyncingScraper] = useState<boolean>(false);
   const [featuredPolitician, setFeaturedPolitician] = useState<Politician>(FEATURED_POLITICIAN);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const showToast = (msg: string) => {
+  const showToast = useCallback((msg: string) => {
     setToastMessage(msg);
     setTimeout(() => {
       setToastMessage(null);
     }, 4000);
+  }, []);
+
+  const {
+    userVotesByPolitician,
+    totalGlobalVotes,
+    feedbackLog,
+    isStreamConnected,
+    isGateModalOpen,
+    pendingVote,
+    challenge,
+    gateError,
+    isSubmitting,
+    castVote,
+    verifyGateAndCompleteVote,
+    fetchChallenge,
+    closeGateModal,
+    getLiveSentiment
+  } = useSentimentStream(showToast);
+
+  const mergeWithFeaturedCebu = (incoming: Politician[]): Politician[] => {
+    return incoming.map((p) => {
+      if (p.roleCategory === 'Governor' && p.jurisdiction.toLowerCase().includes('cebu') && !p.jurisdiction.toLowerCase().includes('city')) {
+        return {
+          ...p,
+          achievements: FEATURED_POLITICIAN.achievements,
+          verifiedRecords: FEATURED_POLITICIAN.verifiedRecords,
+          salnNetWorth: FEATURED_POLITICIAN.salnNetWorth,
+          totalProjects: FEATURED_POLITICIAN.totalProjects
+        };
+      }
+      return p;
+    });
   };
 
-  const handleVote = (type: 'corrupt' | 'not_corrupt') => {
-    setFeaturedPolitician((prev) => {
-      const isCorrupt = type === 'corrupt';
-      const updatedCorrupt = isCorrupt ? prev.sentiment.corruptVotes + 1 : prev.sentiment.corruptVotes;
-      const updatedNotCorrupt = !isCorrupt ? prev.sentiment.notCorruptVotes + 1 : prev.sentiment.notCorruptVotes;
-      const updatedTotal = prev.sentiment.totalResponses + 1;
+  useEffect(() => {
+    let active = true;
+    fetch('/api/politicians')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!active || !data || !Array.isArray(data.politicians) || data.politicians.length === 0) return;
+        const merged = mergeWithFeaturedCebu(data.politicians);
+        setPoliticians(merged);
+        setFeaturedPolitician((prev) => {
+          const updated = merged.find((p) => p.id === prev.id || p.name === prev.name);
+          return updated ? { ...prev, avatarUrl: updated.avatarUrl || prev.avatarUrl } : prev;
+        });
+        if (data.countsByRole) setCountsByRole(data.countsByRole);
+        if (data.lastSyncedAt) setLastSyncedAt(data.lastSyncedAt);
+        if (data.sourceStatuses) setSourceStatuses(data.sourceStatuses);
+      })
+      .catch((err) => {
+        console.error('Could not hydrate /api/politicians:', err);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
-      return {
-        ...prev,
-        sentiment: {
-          ...prev.sentiment,
-          corruptVotes: updatedCorrupt,
-          notCorruptVotes: updatedNotCorrupt,
-          totalResponses: updatedTotal,
-          lastUpdated: 'Just now'
-        }
-      };
-    });
+  const handleSyncScraper = async (refreshRemote = true) => {
+    if (isSyncingScraper) return;
+    setIsSyncingScraper(true);
+    try {
+      const res = await fetch('/api/politicians/scrape', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshRemote })
+      });
+      const data = await res.json();
+      if (res.ok && data.ok && Array.isArray(data.politicians)) {
+        const merged = mergeWithFeaturedCebu(data.politicians);
+        setPoliticians(merged);
+        setFeaturedPolitician((prev) => {
+          const updated = merged.find((p) => p.id === prev.id || p.name === prev.name);
+          return updated ? { ...prev, avatarUrl: updated.avatarUrl || prev.avatarUrl } : prev;
+        });
+        if (data.countsByRole) setCountsByRole(data.countsByRole);
+        if (data.lastSyncedAt) setLastSyncedAt(data.lastSyncedAt);
+        if (data.sourceStatuses) setSourceStatuses(data.sourceStatuses);
+        showToast(`Synced ${merged.length.toLocaleString()} Philippine officials via Scrapling!`);
+      } else {
+        showToast('Could not complete live Scrapling sync; showing verified cached records.');
+      }
+    } catch (err) {
+      console.error('Scraper sync error:', err);
+      showToast('Network error during Scrapling sync.');
+    } finally {
+      setIsSyncingScraper(false);
+    }
+  };
 
-    showToast(
-      type === 'corrupt'
-        ? 'Your misconduct concern was securely logged. Open the Sentiment Intelligence view to inspect verified trends.'
-        : 'Your service approval was logged into the civic sentiment record.'
-    );
+  // Live overlay combining Scrapling directory records with real-time SSE ledger
+  const livePoliticians = useMemo(
+    () =>
+      politicians.map((p) => ({
+        ...p,
+        sentiment: getLiveSentiment(p)
+      })),
+    [politicians, getLiveSentiment]
+  );
+
+  const liveFeaturedPolitician = useMemo(
+    () => ({
+      ...featuredPolitician,
+      sentiment: getLiveSentiment(featuredPolitician)
+    }),
+    [featuredPolitician, getLiveSentiment]
+  );
+
+  const liveSelectedPoliticianForProfile = useMemo(
+    () =>
+      selectedPoliticianForProfile
+        ? {
+            ...selectedPoliticianForProfile,
+            sentiment: getLiveSentiment(selectedPoliticianForProfile)
+          }
+        : null,
+    [selectedPoliticianForProfile, getLiveSentiment]
+  );
+
+  const handleVote = (type: 'corrupt' | 'not_corrupt', targetPolitician?: Politician) => {
+    void castVote(targetPolitician || liveFeaturedPolitician, type);
+  };
+
+  const handleSentimentModalSubmit = (
+    pol: Politician,
+    choice: 'supportive' | 'concerned' | 'undecided',
+    comment: string
+  ) => {
+    const mappedVote: VoteChoice =
+      choice === 'supportive' ? 'not_corrupt' : choice === 'concerned' ? 'corrupt' : 'undecided';
+    return castVote(pol, mappedVote, comment);
   };
 
   const handleSearchSelect = (query: string) => {
@@ -105,8 +217,7 @@ export default function App() {
       return;
     }
 
-    const allPoliticians = [FEATURED_POLITICIAN, ...OTHER_POLITICIANS];
-    const matchedPolitician = allPoliticians.find(
+    const matchedPolitician = politicians.find(
       (p) =>
         p.name.toLowerCase().includes(q) ||
         p.position.toLowerCase().includes(q) ||
@@ -117,7 +228,7 @@ export default function App() {
       return;
     }
 
-    if (q.includes('cebu') || q.includes('juan') || q.includes('governor')) {
+    if (q.includes('cebu') || q.includes('baricuatro') || q.includes('governor')) {
       setActiveTab('home');
       window.scrollTo({ top: 480, behavior: 'smooth' });
       return;
@@ -153,6 +264,7 @@ export default function App() {
           setPreselectedPoliticianForAI(undefined);
           setIsAIAssistantOpen(true);
         }}
+        politicians={livePoliticians}
       />
 
       {/* Toast Notification Banner */}
@@ -188,6 +300,8 @@ export default function App() {
 
             {/* 2. Floating National Statistics Bar */}
             <StatsBar
+              totalPoliticiansCount={livePoliticians.length}
+              totalCitizenVotesCount={totalGlobalVotes}
               onStatClick={(statKey) => {
                 if (statKey === 'politicians') setActiveTab('politicians');
                 else if (statKey === 'projects') setActiveTab('projects');
@@ -198,6 +312,7 @@ export default function App() {
 
             {/* Middle Search Bar/Prompt for Politician Monitoring (As requested in user reference image) */}
             <PoliticianSearchBar
+              politicians={livePoliticians}
               onSelectPolitician={(pol) => {
                 setFeaturedPolitician(pol);
                 showToast(`Now monitoring ${pol.name} on the homepage dashboard!`);
@@ -212,10 +327,13 @@ export default function App() {
                 {/* Column 1: Featured Politician Card (4 cols on lg) */}
                 <div className="lg:col-span-4 flex flex-col">
                   <FeaturedPoliticianCard
-                    politician={featuredPolitician}
+                    politician={liveFeaturedPolitician}
+                    userVote={userVotesByPolitician[liveFeaturedPolitician.id]?.voteType || null}
+                    isStreamConnected={isStreamConnected}
+                    isSubmitting={isSubmitting}
                     onOpenSentimentModal={() => setIsSentimentModalOpen(true)}
                     onOpenTimelineModal={() => setIsTimelineModalOpen(true)}
-                    onVote={handleVote}
+                    onVote={(type) => handleVote(type, liveFeaturedPolitician)}
                   />
                 </div>
 
@@ -285,6 +403,12 @@ export default function App() {
         {/* Dedicated Sub-Views */}
         {activeTab === 'politicians' && (
           <PoliticiansView
+            politicians={livePoliticians}
+            countsByRole={countsByRole}
+            lastSyncedAt={lastSyncedAt}
+            sourceStatuses={sourceStatuses}
+            isSyncing={isSyncingScraper}
+            onSyncScraper={handleSyncScraper}
             onSelectPolitician={(pol) => {
               setFeaturedPolitician(pol);
               setActiveTab('home');
@@ -320,14 +444,21 @@ export default function App() {
 
       {/* Complete Politician Profile & Projects Inspection Modal */}
       <PoliticianProfileModal
-        politician={selectedPoliticianForProfile}
-        isOpen={!!selectedPoliticianForProfile}
+        politician={liveSelectedPoliticianForProfile}
+        isOpen={!!liveSelectedPoliticianForProfile}
         onClose={() => setSelectedPoliticianForProfile(null)}
         onSetAsFeatured={(pol) => {
           setFeaturedPolitician(pol);
           showToast(`Now monitoring ${pol.name} on the homepage dashboard!`);
         }}
-        onVote={handleVote}
+        onVote={(type, pol) => handleVote(type, pol)}
+        userVote={
+          liveSelectedPoliticianForProfile
+            ? userVotesByPolitician[liveSelectedPoliticianForProfile.id]?.voteType || null
+            : null
+        }
+        isSubmitting={isSubmitting}
+        isStreamConnected={isStreamConnected}
         onOpenProjectTracker={(projId) => {
           const match = LATEST_PROJECTS.find((p) => p.id === projId) || LATEST_PROJECTS[0];
           setSelectedProject(match);
@@ -360,10 +491,12 @@ export default function App() {
       <CitizenSentimentModal
         isOpen={isSentimentModalOpen}
         onClose={() => setIsSentimentModalOpen(false)}
-        politician={featuredPolitician}
-        onNewFeedbackSubmitted={(comment) => {
-          showToast('Thank you for contributing to verified civic feedback!');
-        }}
+        politician={liveFeaturedPolitician}
+        userVote={userVotesByPolitician[liveFeaturedPolitician.id]?.voteType || null}
+        isStreamConnected={isStreamConnected}
+        isSubmitting={isSubmitting}
+        feedbackLog={feedbackLog}
+        onSubmitSentiment={handleSentimentModalSubmit}
       />
 
       {/* Feature D: Public Spending Intelligence */}
@@ -387,11 +520,24 @@ export default function App() {
         }}
       />
 
+      {/* Gated Single-Vote Security Modal */}
+      <VoterSecurityGateModal
+        isOpen={isGateModalOpen}
+        onClose={closeGateModal}
+        challenge={challenge}
+        pendingVote={pendingVote}
+        error={gateError}
+        isSubmitting={isSubmitting}
+        onRefreshChallenge={fetchChallenge}
+        onVerify={verifyGateAndCompleteVote}
+      />
+
       {/* BantayAI Advanced Civic Intelligence Assistant Modal */}
       <BantayAIAssistant
         isOpen={isAIAssistantOpen}
         onClose={() => setIsAIAssistantOpen(false)}
         preselectedPoliticianName={preselectedPoliticianForAI}
+        politicians={livePoliticians}
         onOpenProfile={(pol) => setSelectedPoliticianForProfile(pol)}
         onOpenSmartCity={() => setIs3DMapOpen(true)}
         onOpenSpending={() => setIsSpendingModalOpen(true)}

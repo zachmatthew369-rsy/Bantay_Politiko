@@ -4,24 +4,31 @@ import { NATIONAL_STATS } from '../data/mockData';
 
 interface StatsBarProps {
   onStatClick?: (statKey: string) => void;
+  totalPoliticiansCount?: number;
+  totalCitizenVotesCount?: number;
 }
 
-export const StatsBar: React.FC<StatsBarProps> = ({ onStatClick }) => {
+export const StatsBar: React.FC<StatsBarProps> = ({
+  onStatClick,
+  totalPoliticiansCount,
+  totalCitizenVotesCount = 0
+}) => {
   // Animated counting simulation for polished civic tech feel
+  const targetPolCount = totalPoliticiansCount || NATIONAL_STATS.politiciansTracked.value;
   const [counts, setCounts] = useState({
-    politicians: 1100,
-    projects: 8200
+    politicians: targetPolCount,
+    projects: NATIONAL_STATS.projectsMonitored.value
   });
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setCounts({
-        politicians: NATIONAL_STATS.politiciansTracked.value,
+        politicians: targetPolCount,
         projects: NATIONAL_STATS.projectsMonitored.value
       });
     }, 150);
     return () => clearTimeout(timer);
-  }, []);
+  }, [targetPolCount]);
 
   const stats = [
     {
@@ -30,7 +37,7 @@ export const StatsBar: React.FC<StatsBarProps> = ({ onStatClick }) => {
       iconBg: 'bg-blue-50 text-blue-600',
       label: 'Total Politicians Tracked',
       value: counts.politicians.toLocaleString(),
-      growth: '↑ 12%',
+      growth: 'Verified',
       tooltip: 'Elected national and local officials actively monitored with public SALN and project records.'
     },
     {
@@ -56,9 +63,9 @@ export const StatsBar: React.FC<StatsBarProps> = ({ onStatClick }) => {
       icon: ShieldCheck,
       iconBg: 'bg-blue-50 text-blue-600',
       label: 'Total Citizen Votes',
-      value: NATIONAL_STATS.citizenVotes.value,
-      growth: '↑ 32%',
-      tooltip: 'Verified citizen sentiment responses submitted with anti-brigading integrity checks.'
+      value: totalCitizenVotesCount.toLocaleString(),
+      growth: 'Live SSE',
+      tooltip: 'Accurate, real-time count of gated single-vote citizen sentiments recorded on the backend.'
     }
   ];
 

@@ -12,10 +12,16 @@ import {
   TrendingUp,
   Share2
 } from 'lucide-react';
+import { Lock, Radio } from 'lucide-react';
 import { Politician } from '../types';
+import { PoliticianAvatar } from './PoliticianAvatar';
+import { VoteChoice } from '../hooks/useSentimentStream';
 
 interface FeaturedPoliticianCardProps {
   politician: Politician;
+  userVote?: VoteChoice | null;
+  isStreamConnected?: boolean;
+  isSubmitting?: boolean;
   onOpenSentimentModal: () => void;
   onOpenTimelineModal: () => void;
   onVote: (type: 'corrupt' | 'not_corrupt') => void;
@@ -23,22 +29,26 @@ interface FeaturedPoliticianCardProps {
 
 export const FeaturedPoliticianCard: React.FC<FeaturedPoliticianCardProps> = ({
   politician,
+  userVote,
+  isStreamConnected = false,
+  isSubmitting = false,
   onOpenSentimentModal,
   onOpenTimelineModal,
   onVote
 }) => {
   const [activeView, setActiveView] = useState<'sentiment' | 'verified'>('sentiment');
-  const [userVoted, setUserVoted] = useState<'corrupt' | 'not_corrupt' | null>(null);
 
   const handleVoteClick = (type: 'corrupt' | 'not_corrupt') => {
-    setUserVoted(type);
+    if (userVote || isSubmitting) return;
     onVote(type);
   };
 
-  const corruptPercent = politician.sentiment.corruptVotes
-    ? Math.round((politician.sentiment.corruptVotes / politician.sentiment.totalResponses) * 100)
-    : 54;
-  const notCorruptPercent = 100 - corruptPercent;
+  const totalResponses = politician.sentiment.totalResponses || 0;
+  const corruptPercent =
+    totalResponses > 0
+      ? Math.round((politician.sentiment.corruptVotes / totalResponses) * 100)
+      : 0;
+  const notCorruptPercent = totalResponses > 0 ? 100 - corruptPercent : 0;
 
   return (
     <div className="bg-white rounded-2xl md:rounded-3xl border border-slate-200/90 shadow-lg shadow-slate-100 overflow-hidden flex flex-col h-full relative">
@@ -78,20 +88,13 @@ export const FeaturedPoliticianCard: React.FC<FeaturedPoliticianCardProps> = ({
       <div className="px-6 py-3 flex items-start gap-4">
         {/* Official Portrait with Philippine Flag Accent Frame */}
         <div className="relative w-24 h-28 sm:w-28 sm:h-32 rounded-2xl overflow-hidden shrink-0 border-2 border-white shadow-md bg-gradient-to-b from-[#0038A8] via-[#F4F7FC] to-[#CE1126] p-0.5">
-          <div className="w-full h-full rounded-xl overflow-hidden relative">
-            <img
-              src={politician.avatarUrl}
-              alt={politician.name}
-              className="w-full h-full object-cover object-top"
-              referrerPolicy="no-referrer"
-            />
-            {/* Philippine Flag hoist triangle accent */}
-            <div className="absolute top-0 left-0 w-4 h-full bg-white/40 backdrop-blur-[1px] flex flex-col items-center justify-between py-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-yellow-400" />
-              <div className="w-2 h-2 text-[8px] font-bold text-yellow-500">☀</div>
-              <div className="w-1.5 h-1.5 rounded-full bg-yellow-400" />
-            </div>
-          </div>
+          <PoliticianAvatar
+            name={politician.name}
+            avatarUrl={politician.avatarUrl}
+            roleCategory={politician.roleCategory}
+            className="w-full h-full rounded-xl"
+            showFlagAccent={true}
+          />
         </div>
 
         {/* Politician Details */}
@@ -122,7 +125,7 @@ export const FeaturedPoliticianCard: React.FC<FeaturedPoliticianCardProps> = ({
             <div className="flex items-center gap-1.5">
               <Briefcase className="w-3.5 h-3.5 text-slate-400 shrink-0" />
               <span className="bg-blue-50 text-blue-700 font-semibold px-2 py-0.5 rounded text-[11px]">
-                Governor
+                {politician.roleCategory}
               </span>
             </div>
 
@@ -139,7 +142,7 @@ export const FeaturedPoliticianCard: React.FC<FeaturedPoliticianCardProps> = ({
         <div className="px-6 py-4 flex-1 flex flex-col justify-between">
           <div>
             <h3 className="text-sm font-bold text-[#102A56] text-center mb-3">
-              What Do You Think About His Performance?
+              What Do You Think About Their Performance?
             </h3>
 
             {/* Voting Buttons */}
@@ -147,44 +150,65 @@ export const FeaturedPoliticianCard: React.FC<FeaturedPoliticianCardProps> = ({
               {/* Corrupt / Report Misconduct (Red Button) */}
               <button
                 onClick={() => handleVoteClick('corrupt')}
-                className={`flex flex-col items-center justify-center p-3 rounded-2xl text-white transition-all transform active:scale-95 shadow-md ${
-                  userVoted === 'corrupt'
-                    ? 'ring-4 ring-red-300 scale-[1.02] bg-gradient-to-r from-red-700 to-red-800'
-                    : 'bg-gradient-to-r from-[#DC3545] to-[#E63946] hover:brightness-105'
+                disabled={Boolean(userVote) || isSubmitting}
+                className={`flex flex-col items-center justify-center p-3 rounded-2xl text-white transition-all shadow-md ${
+                  userVote === 'corrupt'
+                    ? 'ring-4 ring-red-300 scale-[1.02] bg-gradient-to-r from-red-700 to-red-800 cursor-not-allowed'
+                    : userVote
+                    ? 'bg-slate-300 text-slate-500 shadow-none cursor-not-allowed'
+                    : 'bg-gradient-to-r from-[#DC3545] to-[#E63946] hover:brightness-105 active:scale-95 cursor-pointer'
                 }`}
               >
                 <div className="flex items-center gap-1.5">
-                  <AlertTriangle className="w-4 h-4 fill-white text-red-600" />
+                  <AlertTriangle className={`w-4 h-4 ${userVote && userVote !== 'corrupt' ? 'text-slate-500' : 'fill-white text-red-600'}`} />
                   <span className="text-sm font-extrabold tracking-wide">Corrupt</span>
                 </div>
-                <span className="text-[10px] text-red-100 font-medium mt-0.5">
-                  (Report Misconduct)
+                <span className={`text-[10px] font-medium mt-0.5 ${userVote && userVote !== 'corrupt' ? 'text-slate-500' : 'text-red-100'}`}>
+                  {userVote === 'corrupt' ? '✓ Your Verified Vote' : '(Report Misconduct)'}
                 </span>
               </button>
 
-              {/* Not Corrupt / Support His Service (Green Button) */}
+              {/* Not Corrupt / Support Service (Green Button) */}
               <button
                 onClick={() => handleVoteClick('not_corrupt')}
-                className={`flex flex-col items-center justify-center p-3 rounded-2xl text-white transition-all transform active:scale-95 shadow-md ${
-                  userVoted === 'not_corrupt'
-                    ? 'ring-4 ring-emerald-300 scale-[1.02] bg-gradient-to-r from-emerald-700 to-emerald-800'
-                    : 'bg-gradient-to-r from-[#13A66A] to-[#10B981] hover:brightness-105'
+                disabled={Boolean(userVote) || isSubmitting}
+                className={`flex flex-col items-center justify-center p-3 rounded-2xl text-white transition-all shadow-md ${
+                  userVote === 'not_corrupt'
+                    ? 'ring-4 ring-emerald-300 scale-[1.02] bg-gradient-to-r from-emerald-700 to-emerald-800 cursor-not-allowed'
+                    : userVote
+                    ? 'bg-slate-300 text-slate-500 shadow-none cursor-not-allowed'
+                    : 'bg-gradient-to-r from-[#13A66A] to-[#10B981] hover:brightness-105 active:scale-95 cursor-pointer'
                 }`}
               >
                 <div className="flex items-center gap-1.5">
-                  <CheckCircle className="w-4 h-4 fill-white text-emerald-700" />
+                  <CheckCircle className={`w-4 h-4 ${userVote && userVote !== 'not_corrupt' ? 'text-slate-500' : 'fill-white text-emerald-700'}`} />
                   <span className="text-sm font-extrabold tracking-wide">Not Corrupt</span>
                 </div>
-                <span className="text-[10px] text-emerald-100 font-medium mt-0.5">
-                  (Support His Service)
+                <span className={`text-[10px] font-medium mt-0.5 ${userVote && userVote !== 'not_corrupt' ? 'text-slate-500' : 'text-emerald-100'}`}>
+                  {userVote === 'not_corrupt' ? '✓ Your Verified Vote' : '(Support Service)'}
                 </span>
               </button>
             </div>
 
+            {userVote && (
+              <div className="mb-3 px-3 py-1.5 rounded-xl bg-blue-50 border border-blue-100 text-[11px] font-semibold text-blue-800 flex items-center justify-center gap-1.5">
+                <Lock className="w-3 h-3 text-[#0757D9]" />
+                <span>Single-Vote Fairness Lock active for this official</span>
+              </div>
+            )}
+
             {/* Current Public Sentiment Bar */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
-                <span>Current Public Sentiment</span>
+                <span className="flex items-center gap-1.5">
+                  <span>Current Public Sentiment</span>
+                  {isStreamConnected && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-200">
+                      <Radio className="w-2.5 h-2.5 animate-pulse" />
+                      Live SSE
+                    </span>
+                  )}
+                </span>
                 <button
                   onClick={onOpenSentimentModal}
                   className="text-[11px] text-[#0757D9] hover:underline flex items-center gap-1 font-bold"
@@ -195,28 +219,36 @@ export const FeaturedPoliticianCard: React.FC<FeaturedPoliticianCardProps> = ({
               </div>
 
               {/* Gradient Progress Bar */}
-              <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden flex shadow-inner">
-                <div
-                  style={{ width: `${corruptPercent}%` }}
-                  className="h-full bg-gradient-to-r from-red-500 to-rose-400 transition-all duration-500"
-                />
-                <div
-                  style={{ width: `${notCorruptPercent}%` }}
-                  className="h-full bg-gradient-to-r from-emerald-400 to-emerald-600 transition-all duration-500"
-                />
+              <div className="h-2.5 w-full bg-slate-200 rounded-full overflow-hidden flex shadow-inner">
+                {totalResponses > 0 && (
+                  <>
+                    <div
+                      style={{ width: `${corruptPercent}%` }}
+                      className="h-full bg-gradient-to-r from-red-500 to-rose-400 transition-all duration-500"
+                    />
+                    <div
+                      style={{ width: `${notCorruptPercent}%` }}
+                      className="h-full bg-gradient-to-r from-emerald-400 to-emerald-600 transition-all duration-500"
+                    />
+                  </>
+                )}
               </div>
 
               {/* Percentage Labels */}
               <div className="flex items-center justify-between text-xs font-bold pt-0.5">
-                <span className="text-red-600">{corruptPercent}% Corrupt</span>
-                <span className="text-emerald-600">{notCorruptPercent}% Not Corrupt</span>
+                <span className="text-red-600 tabular-nums">
+                  {corruptPercent}% Corrupt ({politician.sentiment.corruptVotes.toLocaleString()})
+                </span>
+                <span className="text-emerald-600 tabular-nums">
+                  {notCorruptPercent}% Not Corrupt ({politician.sentiment.notCorruptVotes.toLocaleString()})
+                </span>
               </div>
             </div>
           </div>
 
           {/* Footer Metadata */}
           <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400 font-medium">
-            <span>Total Responses: {politician.sentiment.totalResponses.toLocaleString()}</span>
+            <span>Total Responses: {totalResponses.toLocaleString()}</span>
             <span>Last Updated: {politician.sentiment.lastUpdated}</span>
           </div>
         </div>
@@ -239,8 +271,12 @@ export const FeaturedPoliticianCard: React.FC<FeaturedPoliticianCardProps> = ({
               </div>
               <div className="bg-slate-50 border border-slate-100 p-2.5 rounded-xl">
                 <span className="text-[10px] text-slate-400 font-medium block">COA Audit Inquiries</span>
-                <span className="font-extrabold text-blue-700 text-sm tabular-nums">3 Memos Recorded</span>
-                <span className="text-[10px] text-emerald-600 font-semibold block">0 Disallowances Upheld</span>
+                <span className="font-extrabold text-blue-700 text-sm tabular-nums">
+                  {politician.verifiedRecords.coaAuditFindings} Memo(s) Recorded
+                </span>
+                <span className="text-[10px] text-emerald-600 font-semibold block">
+                  {politician.verifiedRecords.ongoingInquiries} Pending Review
+                </span>
               </div>
             </div>
 
@@ -248,7 +284,9 @@ export const FeaturedPoliticianCard: React.FC<FeaturedPoliticianCardProps> = ({
               <div className="flex items-center justify-between">
                 <span className="text-slate-500 font-medium">Ombudsman Legal Status:</span>
                 <span className="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded text-[11px]">
-                  Cleared (1 Inquiry Dismissed)
+                  {politician.verifiedRecords.ongoingInquiries > 0
+                    ? `${politician.verifiedRecords.ongoingInquiries} Inquiry In Review`
+                    : `Cleared (${politician.verifiedRecords.clearedCases} Resolved)`}
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 leading-tight">

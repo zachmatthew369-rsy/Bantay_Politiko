@@ -36,6 +36,7 @@ interface BantayAIAssistantProps {
   onOpenSmartCity?: () => void;
   onOpenSpending?: () => void;
   preselectedPoliticianName?: string;
+  politicians?: Politician[];
 }
 
 export const BantayAIAssistant: React.FC<BantayAIAssistantProps> = ({
@@ -44,9 +45,27 @@ export const BantayAIAssistant: React.FC<BantayAIAssistantProps> = ({
   onOpenProfile,
   onOpenSmartCity,
   onOpenSpending,
-  preselectedPoliticianName
+  preselectedPoliticianName,
+  politicians
 }) => {
-  const allPoliticians = [FEATURED_POLITICIAN, ...OTHER_POLITICIANS];
+  const allPoliticians =
+    politicians && politicians.length > 0 ? politicians : [FEATURED_POLITICIAN, ...OTHER_POLITICIANS];
+
+  // Keep selector fast by prioritizing executive, national legislative, governors, and sample local officials
+  const selectorPoliticians = React.useMemo(() => {
+    const priorityRoles = new Set(['President', 'Senator', 'Governor', 'Congressman']);
+    const primary = allPoliticians.filter((p) => priorityRoles.has(p.roleCategory));
+    const localSample = allPoliticians.filter((p) => !priorityRoles.has(p.roleCategory)).slice(0, 60);
+    const combined = [...primary, ...localSample].slice(0, 220);
+    if (
+      preselectedPoliticianName &&
+      !combined.some((p) => p.name === preselectedPoliticianName)
+    ) {
+      const exact = allPoliticians.find((p) => p.name === preselectedPoliticianName);
+      if (exact) combined.unshift(exact);
+    }
+    return combined;
+  }, [allPoliticians, preselectedPoliticianName]);
 
   const [selectedPolitician, setSelectedPolitician] = useState<string>(
     preselectedPoliticianName || 'All Politicians'
@@ -57,8 +76,8 @@ export const BantayAIAssistant: React.FC<BantayAIAssistantProps> = ({
       sender: 'assistant',
       text: `### Mabuhay! I am BantayAI 🏛️
 
-I am your **AI Civic Intelligence Assistant** powered by **Gemini 3.8 Flash**. I can answer detailed questions about:
-- **Politician Achievements & Track Records:** What projects have been delivered vs. what is still pending.
+I am your **AI Civic Intelligence Assistant** powered by **Gemini 3.8 Flash** and grounded in **${allPoliticians.length.toLocaleString()} live official records** across President, Senators, Congressmen, Governors, Mayors, Councilors, and Barangay Officials:
+- **Official Profiles & Track Records:** Real-time verified rosters from OP, Senate, House of Representatives, DBM, DILG, and Liga ng mga Barangay.
 - **Budget & Procurement Transparency:** How public funds are budgeted across DPWH, DOH, and LGUs.
 - **Public Sentiment vs. Verified Findings:** Clarifying the critical difference between citizen opinion polls and official Commission on Audit (COA) / Ombudsman records.
 - **Archipelago Smart Cities:** Insights into digital twin initiatives across Luzon, Visayas, Mindanao, and Palawan.
@@ -66,10 +85,10 @@ I am your **AI Civic Intelligence Assistant** powered by **Gemini 3.8 Flash**. I
 *Click any prompt below or type your question to begin!*`,
       timestamp: 'Just now',
       suggestedPrompts: [
-        'What are Hon. Juan Dela Cruz\'s verified achievements and projects?',
+        "What is Gov. Pamela \"Pam\" Baricuatro's official profile and Cebu projects?",
+        'Who are the Senators of the 20th Congress?',
         'How does BantayPolitiko separate citizen sentiment from verified facts?',
-        'Which infrastructure projects in the Visayas are currently delayed?',
-        'Breakdown of the ₱1.24 Trillion tracked national budget'
+        'Which infrastructure projects in the Visayas are currently delayed?'
       ]
     }
   ]);
@@ -141,10 +160,10 @@ I am your **AI Civic Intelligence Assistant** powered by **Gemini 3.8 Flash**. I
 I could not connect to the real-time AI service, but here is what the verified BantayPolitiko records indicate:
 
 - **Official Public Records:** You can inspect government infrastructure milestones and contract audits in the **Projects** and **Budget Tracker** views.
-- **Politician Dossiers:** For ${selectedPolitician !== 'All Politicians' ? selectedPolitician : 'Hon. Juan Dela Cruz'}, official projects include the Cebu Provincial Hospital Expansion (85% completed) and Rural Road Improvement Project (40% completed).`,
+- **Politician Dossiers:** For ${selectedPolitician !== 'All Politicians' ? selectedPolitician : 'Hon. Pamela "Pam" Baricuatro (Governor of Cebu)'}, official regional infrastructure projects include the Cebu Provincial Hospital Expansion (85% completed) and Rural Road Improvement Project (40% completed).`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         suggestedPrompts: [
-          'What are Hon. Juan Dela Cruz\'s verified achievements?',
+          'Tell me about Gov. Pamela Baricuatro of Cebu',
           'Explain difference between citizen sentiment and verified facts'
         ]
       };
@@ -169,9 +188,9 @@ I could not connect to the real-time AI service, but here is what the verified B
 Ask me about any Philippine politician, legislative bill, public infrastructure project, or budget allocation.`,
         timestamp: 'Just now',
         suggestedPrompts: [
-          'What are Hon. Juan Dela Cruz\'s verified achievements?',
-          'Which infrastructure projects in the Philippines are delayed?',
-          'How is the ₱450M Cebu Hospital Expansion budget allocated?'
+          'Tell me about Gov. Pamela Baricuatro of Cebu',
+          'Who are the Senators of the 20th Congress?',
+          'Which infrastructure projects in the Philippines are delayed?'
         ]
       }
     ]);
@@ -237,10 +256,10 @@ Ask me about any Philippine politician, legislative bill, public infrastructure 
               onChange={(e) => setSelectedPolitician(e.target.value)}
               className="w-full bg-white border border-blue-200 rounded-lg px-2.5 py-1 text-xs font-bold text-[#102A56] outline-none focus:ring-2 focus:ring-blue-500 shadow-2xs"
             >
-              <option value="All Politicians">🌐 All Tracked Officials & General Topics</option>
-              {allPoliticians.map((p) => (
+              <option value="All Politicians">🌐 All {allPoliticians.length.toLocaleString()} Tracked Officials</option>
+              {selectorPoliticians.map((p) => (
                 <option key={p.id} value={p.name}>
-                  👤 {p.name} ({p.position} · {p.jurisdiction})
+                  [{p.roleCategory}] {p.name} ({p.jurisdiction})
                 </option>
               ))}
             </select>

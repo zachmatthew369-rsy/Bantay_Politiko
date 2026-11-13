@@ -16,17 +16,27 @@ import {
   ShieldCheck,
   Building,
   Clock,
-  Sparkles
+  Sparkles,
+  Phone,
+  Mail,
+  Globe,
+  Lock,
+  Radio
 } from 'lucide-react';
 import { Politician } from '../../types';
+import { PoliticianAvatar } from '../PoliticianAvatar';
+import { VoteChoice } from '../../hooks/useSentimentStream';
 
 interface PoliticianProfileModalProps {
   politician: Politician | null;
   isOpen: boolean;
   onClose: () => void;
   onSetAsFeatured: (politician: Politician) => void;
-  onVote: (type: 'corrupt' | 'not_corrupt') => void;
+  onVote: (type: 'corrupt' | 'not_corrupt', politician: Politician) => void;
   onOpenProjectTracker?: (projectId: string) => void;
+  userVote?: VoteChoice | null;
+  isSubmitting?: boolean;
+  isStreamConnected?: boolean;
 }
 
 export const PoliticianProfileModal: React.FC<PoliticianProfileModalProps> = ({
@@ -35,16 +45,21 @@ export const PoliticianProfileModal: React.FC<PoliticianProfileModalProps> = ({
   onClose,
   onSetAsFeatured,
   onVote,
-  onOpenProjectTracker
+  onOpenProjectTracker,
+  userVote,
+  isSubmitting = false,
+  isStreamConnected = false
 }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'projects' | 'achievements' | 'pending' | 'sentiment'>('overview');
 
   if (!isOpen || !politician) return null;
 
-  const corruptPercent = politician.sentiment.corruptVotes
-    ? Math.round((politician.sentiment.corruptVotes / politician.sentiment.totalResponses) * 100)
-    : 54;
-  const notCorruptPercent = 100 - corruptPercent;
+  const totalResponses = politician.sentiment.totalResponses || 0;
+  const corruptPercent =
+    totalResponses > 0
+      ? Math.round((politician.sentiment.corruptVotes / totalResponses) * 100)
+      : 0;
+  const notCorruptPercent = totalResponses > 0 ? 100 - corruptPercent : 0;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-900/75 backdrop-blur-md animate-fadeIn">
@@ -56,18 +71,27 @@ export const PoliticianProfileModal: React.FC<PoliticianProfileModalProps> = ({
               <ShieldCheck className="w-5 h-5 text-yellow-300" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <h2 className="text-lg font-black tracking-tight">{politician.name}</h2>
+                <span className="bg-white/15 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border border-white/25">
+                  {politician.roleCategory}
+                </span>
                 {politician.isVerified && (
                   <span className="bg-blue-400 text-blue-950 text-[10px] font-black px-2 py-0.5 rounded-full flex items-center gap-1">
-                    ✓ Verified Official Identity
+                    ✓ Verified Official
                   </span>
                 )}
               </div>
-              <p className="text-xs text-blue-100 flex items-center gap-2">
+              <p className="text-xs text-blue-100 flex flex-wrap items-center gap-2 mt-0.5">
                 <span>{politician.position}</span>
                 <span>·</span>
                 <span>{politician.jurisdiction}</span>
+                {politician.politicalAffiliation && (
+                  <>
+                    <span>·</span>
+                    <span className="text-yellow-200 font-semibold">{politician.politicalAffiliation}</span>
+                  </>
+                )}
               </p>
             </div>
           </div>
@@ -98,14 +122,13 @@ export const PoliticianProfileModal: React.FC<PoliticianProfileModalProps> = ({
         <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex flex-col md:flex-row items-center gap-6">
           {/* Portrait with Philippine Flag Accent Frame */}
           <div className="relative w-24 h-28 sm:w-28 sm:h-32 rounded-2xl overflow-hidden shrink-0 border-2 border-white shadow-md bg-gradient-to-b from-[#0038A8] via-[#F4F7FC] to-[#CE1126] p-0.5">
-            <div className="w-full h-full rounded-xl overflow-hidden relative">
-              <img
-                src={politician.avatarUrl}
-                alt={politician.name}
-                className="w-full h-full object-cover object-top"
-                referrerPolicy="no-referrer"
-              />
-            </div>
+            <PoliticianAvatar
+              name={politician.name}
+              avatarUrl={politician.avatarUrl}
+              roleCategory={politician.roleCategory}
+              className="w-full h-full rounded-xl"
+              showFlagAccent={true}
+            />
           </div>
 
           {/* Quick Metrics Bar */}
@@ -125,7 +148,7 @@ export const PoliticianProfileModal: React.FC<PoliticianProfileModalProps> = ({
             <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs">
               <span className="text-[10px] text-slate-400 font-bold uppercase block">Citizen Sentiment</span>
               <span className="text-sm font-black text-emerald-600 tabular-nums">{notCorruptPercent}% Approval</span>
-              <span className="text-[10px] text-slate-400 block font-medium">{politician.sentiment.totalResponses.toLocaleString()} Votes</span>
+              <span className="text-[10px] text-slate-400 block font-medium">{totalResponses.toLocaleString()} Votes</span>
             </div>
 
             <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs">
@@ -214,6 +237,93 @@ export const PoliticianProfileModal: React.FC<PoliticianProfileModalProps> = ({
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-100">
                   {politician.biography}
                 </p>
+              </div>
+
+              {/* Official Office Contact & Source Provenance */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 bg-white border border-slate-200 rounded-2xl space-y-2.5">
+                  <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#102A56] flex items-center gap-1.5">
+                    <Building className="w-3.5 h-3.5 text-blue-600" />
+                    <span>Official Office & Contact Details</span>
+                  </h4>
+                  <div className="space-y-1.5 text-xs text-slate-600">
+                    <div>
+                      <span className="font-bold text-slate-800">Term:</span> {politician.currentTerm}
+                    </div>
+                    {politician.district && (
+                      <div>
+                        <span className="font-bold text-slate-800">District / Scope:</span> {politician.district}
+                      </div>
+                    )}
+                    {politician.partyList && (
+                      <div>
+                        <span className="font-bold text-slate-800">Party-List:</span> {politician.partyList}
+                      </div>
+                    )}
+                    {politician.contactInfo?.officeAddress && (
+                      <div className="flex items-start gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
+                        <span>{politician.contactInfo.officeAddress}</span>
+                      </div>
+                    )}
+                    {politician.contactInfo?.phone && (
+                      <div className="flex items-center gap-1.5">
+                        <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span className="tabular-nums">{politician.contactInfo.phone}</span>
+                      </div>
+                    )}
+                    {politician.contactInfo?.email && (
+                      <div className="flex items-center gap-1.5">
+                        <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span>{politician.contactInfo.email}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="p-4 bg-blue-50/50 border border-blue-100 rounded-2xl space-y-2.5">
+                  <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#102A56] flex items-center gap-1.5">
+                    <Globe className="w-3.5 h-3.5 text-blue-600" />
+                    <span>Directory Source & Verification</span>
+                  </h4>
+                  <div className="space-y-1.5 text-xs text-slate-600">
+                    <div>
+                      <span className="font-bold text-slate-800">Primary Source:</span>{' '}
+                      {politician.sourceName || 'Official Philippine Government Directory'}
+                    </div>
+                    {politician.lastVerifiedDate && (
+                      <div>
+                        <span className="font-bold text-slate-800">Last Synced:</span> {politician.lastVerifiedDate}
+                      </div>
+                    )}
+                    {politician.committees && politician.committees.length > 0 && (
+                      <div className="pt-1">
+                        <span className="font-bold text-slate-800 block mb-1">Committees:</span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {politician.committees.map((c, idx) => (
+                            <span
+                              key={idx}
+                              className="px-2 py-0.5 rounded-md bg-white border border-blue-200 text-blue-800 text-[10px] font-bold"
+                            >
+                              {c}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {politician.sourceUrl && (
+                      <a
+                        href={politician.sourceUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-blue-700 hover:underline font-bold pt-1"
+                      >
+                        <span>Visit Official Portal</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
+                  </div>
+                </div>
               </div>
 
               {/* Public Office Career History */}
@@ -392,41 +502,80 @@ export const PoliticianProfileModal: React.FC<PoliticianProfileModalProps> = ({
           {activeTab === 'sentiment' && (
             <div className="space-y-5">
               <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                    Citizen Approval vs Misconduct Concerns
-                  </h3>
-                  <span className="text-xs text-slate-400">
-                    Total Responses: {politician.sentiment.totalResponses.toLocaleString()}
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                      Citizen Approval vs Misconduct Concerns
+                    </h3>
+                    {isStreamConnected && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                        <Radio className="w-2.5 h-2.5 animate-pulse" />
+                        Live SSE
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-xs font-semibold text-slate-500 tabular-nums">
+                    Total Verified Responses: {totalResponses.toLocaleString()}
                   </span>
                 </div>
 
                 {/* Progress Bar */}
                 <div className="h-3 w-full bg-slate-200 rounded-full overflow-hidden flex">
-                  <div style={{ width: `${corruptPercent}%` }} className="bg-red-500 h-full" />
-                  <div style={{ width: `${notCorruptPercent}%` }} className="bg-emerald-500 h-full" />
+                  {totalResponses > 0 && (
+                    <>
+                      <div style={{ width: `${corruptPercent}%` }} className="bg-red-500 h-full transition-all duration-500" />
+                      <div style={{ width: `${notCorruptPercent}%` }} className="bg-emerald-500 h-full transition-all duration-500" />
+                    </>
+                  )}
                 </div>
 
-                <div className="flex items-center justify-between text-xs font-bold">
-                  <span className="text-red-600">{corruptPercent}% Misconduct Concern</span>
-                  <span className="text-emerald-600">{notCorruptPercent}% Approval / Support</span>
+                <div className="flex items-center justify-between text-xs font-bold tabular-nums">
+                  <span className="text-red-600">
+                    {corruptPercent}% Misconduct Concern ({politician.sentiment.corruptVotes.toLocaleString()})
+                  </span>
+                  <span className="text-emerald-600">
+                    {notCorruptPercent}% Approval / Support ({politician.sentiment.notCorruptVotes.toLocaleString()})
+                  </span>
                 </div>
+
+                {userVote && (
+                  <div className="px-3.5 py-2 rounded-xl bg-blue-50 border border-blue-200 text-xs font-semibold text-blue-800 flex items-center justify-center gap-2">
+                    <Lock className="w-3.5 h-3.5 text-[#0757D9]" />
+                    <span>
+                      Single-Vote Fairness Lock active — your verified vote ({userVote === 'corrupt' ? 'Misconduct Concern' : userVote === 'not_corrupt' ? 'Support Public Service' : 'Undecided'}) is permanently recorded for this official.
+                    </span>
+                  </div>
+                )}
 
                 {/* Direct Vote Buttons inside modal */}
                 <div className="pt-2 grid grid-cols-2 gap-3">
                   <button
-                    onClick={() => onVote('corrupt')}
-                    className="p-3 rounded-2xl bg-gradient-to-r from-red-600 to-rose-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm hover:brightness-105 active:scale-95 transition-all"
+                    onClick={() => onVote('corrupt', politician)}
+                    disabled={Boolean(userVote) || isSubmitting}
+                    className={`p-3 rounded-2xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all ${
+                      userVote === 'corrupt'
+                        ? 'bg-red-700 text-white ring-4 ring-red-200 cursor-not-allowed'
+                        : userVote
+                        ? 'bg-slate-200 text-slate-500 cursor-not-allowed shadow-none'
+                        : 'bg-gradient-to-r from-red-600 to-rose-700 text-white hover:brightness-105 active:scale-95'
+                    }`}
                   >
                     <AlertTriangle className="w-4 h-4" />
-                    <span>Report Misconduct</span>
+                    <span>{userVote === 'corrupt' ? '✓ Voted Misconduct Concern' : 'Report Misconduct'}</span>
                   </button>
                   <button
-                    onClick={() => onVote('not_corrupt')}
-                    className="p-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm hover:brightness-105 active:scale-95 transition-all"
+                    onClick={() => onVote('not_corrupt', politician)}
+                    disabled={Boolean(userVote) || isSubmitting}
+                    className={`p-3 rounded-2xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all ${
+                      userVote === 'not_corrupt'
+                        ? 'bg-emerald-700 text-white ring-4 ring-emerald-200 cursor-not-allowed'
+                        : userVote
+                        ? 'bg-slate-200 text-slate-500 cursor-not-allowed shadow-none'
+                        : 'bg-gradient-to-r from-emerald-600 to-teal-700 text-white hover:brightness-105 active:scale-95'
+                    }`}
                   >
                     <CheckCircle2 className="w-4 h-4" />
-                    <span>Support Public Service</span>
+                    <span>{userVote === 'not_corrupt' ? '✓ Voted Support Service' : 'Support Public Service'}</span>
                   </button>
                 </div>
               </div>

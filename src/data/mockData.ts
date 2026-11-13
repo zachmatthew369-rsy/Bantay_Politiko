@@ -5,284 +5,86 @@ import {
   ProvinceMapData,
   PublicSpendingMetric
 } from '../types';
+import {
+  INITIAL_PHILIPPINE_POLITICIANS,
+  INITIAL_COUNTS_BY_ROLE
+} from './generatedPoliticians';
 
-export const FEATURED_POLITICIAN: Politician = {
-  id: 'gov-juan-dela-cruz',
-  name: 'Hon. Juan Dela Cruz',
-  honorific: 'Hon.',
-  position: 'Governor, Province of Cebu',
-  jurisdiction: 'Cebu, Central Visayas',
-  region: 'Region VII (Central Visayas)',
-  politicalAffiliation: 'One Cebu / Federal Party Alliance',
-  currentTerm: '2025 - 2028',
-  isVerified: true,
-  avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=600&auto=format&fit=crop', // high-res portrait
-  salnNetWorth: '₱ 84,250,000.00',
-  salnYear: 2025,
-  totalProjects: 742,
-  totalBudgetAllocated: '₱ 28.4 Billion',
-  publicOfficeHistory: [
-    'Provincial Governor (2025 - Present)',
-    'Representative, 1st District of Cebu (2019 - 2025)',
-    'City Mayor, Talisay City (2013 - 2019)'
-  ],
-  sentiment: {
-    corruptVotes: 69525, // 54%
-    notCorruptVotes: 59225, // 46%
-    supportivePercent: 46,
-    concernedPercent: 44,
-    undecidedPercent: 10,
-    totalResponses: 128750,
-    lastUpdated: 'Oct 17, 2026, 10:24 AM'
-  },
-  verifiedRecords: {
-    coaAuditFindings: 3,
-    ombudsmanCases: 1,
-    clearedCases: 2,
-    ongoingInquiries: 1
-  },
-  biography:
-    'Hon. Juan Dela Cruz has served in local government administration for over 15 years, overseeing major infrastructure developments in Central Visayas including provincial hospital modernization, inter-island transport corridors, and flood mitigation initiatives.',
-  achievements: [
-    'Spearheaded the Cebu Provincial Hospital 5-Storey Expansion (85% completed, 120 ICU beds)',
-    'Completed 142 km of rural concrete farm-to-market highways across northern & southern Cebu',
-    'Maintained 100% timely SALN filing compliance under the Civil Service Commission (RA 6713)',
-    'Established the Cebu Digital Governance One-Stop Citizen Permitting Portal'
-  ],
-  associatedProjectsList: [
-    {
-      id: 'cebu-prov-hospital-expansion',
-      title: 'Cebu Provincial Hospital Expansion',
-      location: 'Cebu City, Cebu',
-      budget: '₱ 450,000,000',
-      status: 'In Progress',
-      completionPercentage: 85
-    },
-    {
-      id: 'rural-road-improvement-project',
-      title: 'Rural Road Improvement Project',
-      location: 'Danao, Cebu',
-      budget: '₱ 1,120,000,000',
-      status: 'Ongoing',
-      completionPercentage: 40
-    },
-    {
-      id: 'school-building-construction',
-      title: 'School Building Construction',
-      location: 'San Fernando, Cebu',
-      budget: '₱ 75,000,000',
-      status: 'Pending',
-      completionPercentage: 0
-    },
-    {
-      id: 'water-supply-system',
-      title: 'Water Supply System',
-      location: 'Carcar, Cebu',
-      budget: '₱ 200,000,000',
-      status: 'Ongoing',
-      completionPercentage: 60
-    }
-  ],
-  pendingInquiriesList: [
-    {
-      id: 'inq-1',
-      title: 'COA AOM No. 2026-DPWH-R7-009: Paving reconciliation along Km 8-10',
-      agency: 'Commission on Audit Regional Office VII',
-      status: 'In Progress (Within 60-day response window)',
-      date: 'October 14, 2026'
-    },
-    {
-      id: 'inq-2',
-      title: 'OMB-V-C-24-0192 Medical Supply Open Bidding Evaluation',
-      agency: 'Office of the Ombudsman (Visayas)',
-      status: 'Dismissed & Cleared (Resolution Issued)',
-      date: 'June 20, 2026'
-    }
-  ]
-};
+const cebuGovMatch = INITIAL_PHILIPPINE_POLITICIANS.find(
+  (p) => p.id === 'gov-cebu-pamela-baricuatro'
+);
 
-export const OTHER_POLITICIANS: Politician[] = [
-  {
-    id: 'sen-maria-santos',
-    name: 'Hon. Maria Clara Santos',
-    honorific: 'Senator',
-    position: 'Senator of the Republic',
-    jurisdiction: 'National',
-    region: 'Senate of the Philippines',
-    politicalAffiliation: 'Independent',
-    currentTerm: '2022 - 2028',
-    isVerified: true,
-    avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=600&auto=format&fit=crop',
-    salnNetWorth: '₱ 42,100,000.00',
-    salnYear: 2025,
-    totalProjects: 112,
-    totalBudgetAllocated: '₱ 14.2 Billion',
-    publicOfficeHistory: ['Senator (2022 - Present)', 'Party-list Representative (2016 - 2022)'],
-    sentiment: {
-      corruptVotes: 24100,
-      notCorruptVotes: 81900,
-      supportivePercent: 77,
-      concernedPercent: 18,
-      undecidedPercent: 5,
-      totalResponses: 106000,
-      lastUpdated: 'Nov 02, 2026, 02:15 PM'
-    },
-    verifiedRecords: {
-      coaAuditFindings: 0,
-      ombudsmanCases: 0,
-      clearedCases: 1,
-      ongoingInquiries: 0
-    },
-    biography: 'Known for legislative oversight on public works contracts, healthcare budget allocation, and the Open Government Procurement Transparency Act.',
-    achievements: [
-      'Principal Sponsor of the Open Contracting & Public Works Transparency Act',
-      'Authored the Universal Healthcare Barangay Health Station Modernization Bill',
-      'Zero unliquidated travel or discretionary expense audits over 8 years in office'
-    ],
-    associatedProjectsList: [
-      {
-        id: 'sen-proj-1',
-        title: 'National Telehealth Infrastructure Modernization',
-        location: 'Nationwide / DOH',
-        budget: '₱ 2,800,000,000',
-        status: 'Completed',
-        completionPercentage: 100
+export const FEATURED_POLITICIAN: Politician = cebuGovMatch
+  ? {
+      ...cebuGovMatch,
+      totalProjects: 742,
+      totalBudgetAllocated: '₱ 28.4 Billion',
+      salnNetWorth: 'Filed per RA 6713 (CSC Archive)',
+      publicOfficeHistory: [
+        'Provincial Governor, Province of Cebu (2025 - 2028)',
+        'Philanthropist & Healthcare Access Advocate, Central Visayas'
+      ],
+      verifiedRecords: {
+        coaAuditFindings: 1,
+        ombudsmanCases: 0,
+        clearedCases: 1,
+        ongoingInquiries: 0
       },
-      {
-        id: 'sen-proj-2',
-        title: 'Disaster-Resilient Community Evacuation Centers (Visayas & Bicol)',
-        location: 'Region V & VIII',
-        budget: '₱ 1,450,000,000',
-        status: 'In Progress',
-        completionPercentage: 78
-      }
-    ],
-    pendingInquiriesList: []
-  },
-  {
-    id: 'may-roberto-tan',
-    name: 'Hon. Roberto Tan',
-    honorific: 'Mayor',
-    position: 'City Mayor, Davao City',
-    jurisdiction: 'Davao del Sur, Davao Region',
-    region: 'Region XI (Davao Region)',
-    politicalAffiliation: 'Hugpong Alliance',
-    currentTerm: '2025 - 2028',
-    isVerified: true,
-    avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=600&auto=format&fit=crop',
-    salnNetWorth: '₱ 56,800,000.00',
-    salnYear: 2025,
-    totalProjects: 310,
-    totalBudgetAllocated: '₱ 18.9 Billion',
-    publicOfficeHistory: ['City Mayor (2025 - Present)', 'Vice Mayor (2022 - 2025)'],
-    sentiment: {
-      corruptVotes: 32000,
-      notCorruptVotes: 64000,
-      supportivePercent: 66,
-      concernedPercent: 28,
-      undecidedPercent: 6,
-      totalResponses: 96000,
-      lastUpdated: 'Nov 08, 2026, 09:40 AM'
-    },
-    verifiedRecords: {
-      coaAuditFindings: 1,
-      ombudsmanCases: 0,
-      clearedCases: 1,
-      ongoingInquiries: 0
-    },
-    biography: 'Advocate for modern coastal bypass transit, digital business permitting, and public safety infrastructure.',
-    achievements: [
-      'Delivered the Davao Coastal Road Bypass Phase 1 (18.2 km)',
-      'Constructed 4 new Central 911 emergency satellite response stations',
-      'Recorded 98% business permit automation renewal rate'
-    ],
-    associatedProjectsList: [
-      {
-        id: 'dav-proj-1',
-        title: 'Davao Coastal Road Segment C & Seawall',
-        location: 'Davao City',
-        budget: '₱ 3,600,000,000',
-        status: 'In Progress',
-        completionPercentage: 72
-      },
-      {
-        id: 'dav-proj-2',
-        title: 'High-Priority Bus System (HPBS) Depots',
-        location: 'Toril & Bunawan, Davao',
-        budget: '₱ 2,100,000,000',
-        status: 'Ongoing',
-        completionPercentage: 55
-      }
-    ],
-    pendingInquiriesList: [
-      {
-        id: 'inq-dav-1',
-        title: 'COA AAR Note: Verification of contractor equipment mobilization logs',
-        agency: 'Commission on Audit Regional Office XI',
-        status: 'Resolved & Cleared',
-        date: 'May 12, 2026'
-      }
-    ]
-  },
-  {
-    id: 'may-benjamin-magalong',
-    name: 'Hon. Benjamin Magalong',
-    honorific: 'Mayor',
-    position: 'City Mayor, Baguio City',
-    jurisdiction: 'Benguet, Cordillera (CAR)',
-    region: 'Cordillera Administrative Region (CAR)',
-    politicalAffiliation: 'Independent',
-    currentTerm: '2025 - 2028',
-    isVerified: true,
-    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=600&auto=format&fit=crop',
-    salnNetWorth: '₱ 31,400,000.00',
-    salnYear: 2025,
-    totalProjects: 185,
-    totalBudgetAllocated: '₱ 8.4 Billion',
-    publicOfficeHistory: ['City Mayor (2019 - Present)', 'Police Director (Retired)'],
-    sentiment: {
-      corruptVotes: 11200,
-      notCorruptVotes: 89400,
-      supportivePercent: 88,
-      concernedPercent: 9,
-      undecidedPercent: 3,
-      totalResponses: 100600,
-      lastUpdated: 'Nov 09, 2026, 04:30 PM'
-    },
-    verifiedRecords: {
-      coaAuditFindings: 0,
-      ombudsmanCases: 0,
-      clearedCases: 3,
-      ongoingInquiries: 0
-    },
-    biography: 'Nationally recognized pioneer for Good Governance, anti-corruption in public works procurement, and smart city digital twin traffic management.',
-    achievements: [
-      'Pioneered Open Bidding Livestreams and 0% Kickback Procurement Policy',
-      'Constructed the Baguio Smart City Operations & Disaster Resilience Center',
-      'Rehabilitated the Baguio Botanical Garden and Wright Park Eco-corridors',
-      'Named UN Habitat Good Governance Exemplar'
-    ],
-    associatedProjectsList: [
-      {
-        id: 'bag-proj-1',
-        title: 'Baguio City Smart Mobility & Traffic Management Command Hub',
-        location: 'Baguio City',
-        budget: '₱ 480,000,000',
-        status: 'Completed',
-        completionPercentage: 100
-      },
-      {
-        id: 'bag-proj-2',
-        title: 'Irisan Eco-Park Waste-to-Energy Transformation',
-        location: 'Irisan, Baguio',
-        budget: '₱ 320,000,000',
-        status: 'In Progress',
-        completionPercentage: 88
-      }
-    ],
-    pendingInquiriesList: []
-  }
+      biography:
+        'Hon. Pamela "Pam" Baricuatro serves as the Provincial Governor of Cebu for the 2025–2028 term, prioritizing provincial hospital upgrades, rural road connectivity, and transparent LGU procurement across Cebu’s 44 municipalities and 6 component cities.',
+      achievements: [
+        'Overseeing the Cebu Provincial Hospital Expansion (₱450M, 85% completed)',
+        'Coordinating rural farm-to-market infrastructure & potable water access across Cebu districts',
+        'Enforcing open provincial procurement records and RA 6713 SALN compliance'
+      ],
+      associatedProjectsList: [
+        {
+          id: 'cebu-prov-hospital-expansion',
+          title: 'Cebu Provincial Hospital Expansion',
+          location: 'Cebu City, Cebu',
+          budget: '₱ 450,000,000',
+          status: 'In Progress',
+          completionPercentage: 85
+        },
+        {
+          id: 'rural-road-improvement-project',
+          title: 'Rural Road Improvement Project',
+          location: 'Danao, Cebu',
+          budget: '₱ 1,120,000,000',
+          status: 'Ongoing',
+          completionPercentage: 40
+        },
+        {
+          id: 'school-building-construction',
+          title: 'School Building Construction',
+          location: 'San Fernando, Cebu',
+          budget: '₱ 75,000,000',
+          status: 'Pending',
+          completionPercentage: 0
+        },
+        {
+          id: 'water-supply-system',
+          title: 'Water Supply System',
+          location: 'Carcar, Cebu',
+          budget: '₱ 200,000,000',
+          status: 'Ongoing',
+          completionPercentage: 60
+        }
+      ],
+      pendingInquiriesList: []
+    }
+  : INITIAL_PHILIPPINE_POLITICIANS[0];
+
+export const OTHER_POLITICIANS: Politician[] = INITIAL_PHILIPPINE_POLITICIANS.filter(
+  (p) => p.id !== FEATURED_POLITICIAN.id
+);
+
+export const ALL_INITIAL_POLITICIANS: Politician[] = [
+  FEATURED_POLITICIAN,
+  ...OTHER_POLITICIANS
 ];
+
+export { INITIAL_COUNTS_BY_ROLE };
 
 export const LATEST_PROJECTS: GovernmentProject[] = [
   {
@@ -504,7 +306,7 @@ export const PHILIPPINES_PROVINCES: ProvinceMapData[] = [
     projectsCount: 742,
     budgetTotal: '₱ 28.4B',
     budgetRaw: 28400000000,
-    activePoliticians: ['Hon. Juan Dela Cruz (Governor)', 'Hon. Michael Rama (Former Mayor)', 'Rep. Vincent Franco (1st Dist.)'],
+    activePoliticians: ['Gov. Pamela "Pam" Baricuatro (Cebu)', 'Mayor Nestor Archival Sr. (Cebu City)', 'Rep. Rhea Mae A. Gullas (1st Dist.)'],
     statusBreakdown: { completed: 210, inProgress: 380, delayed: 152 },
     coords: { x: 57, y: 55 }
   },
@@ -516,7 +318,7 @@ export const PHILIPPINES_PROVINCES: ProvinceMapData[] = [
     projectsCount: 1840,
     budgetTotal: '₱ 142.6B',
     budgetRaw: 142600000000,
-    activePoliticians: ['Hon. Maria Clara Santos (Senator)', 'Hon. Honey Lacuna (Mayor)', 'Rep. Arjo Atayde'],
+    activePoliticians: ['Mayor Francisco "Isko Moreno" Domagoso (Manila)', 'Mayor Joy Belmonte (QC)', 'Mayor Vico Sotto (Pasig)'],
     statusBreakdown: { completed: 620, inProgress: 940, delayed: 280 },
     coords: { x: 38, y: 32 }
   },
@@ -528,7 +330,7 @@ export const PHILIPPINES_PROVINCES: ProvinceMapData[] = [
     projectsCount: 512,
     budgetTotal: '₱ 21.8B',
     budgetRaw: 21800000000,
-    activePoliticians: ['Hon. Roberto Tan (Mayor)', 'Hon. Yvonne Cagas (Governor)'],
+    activePoliticians: ['Gov. Yvonne R. Cagas (Davao del Sur)', 'Mayor Rodrigo Duterte / Acting Mayor Sebastian Duterte'],
     statusBreakdown: { completed: 180, inProgress: 260, delayed: 72 },
     coords: { x: 68, y: 82 }
   },
@@ -687,10 +489,10 @@ export const PUBLIC_SPENDING_DATA: PublicSpendingMetric[] = [
 ];
 
 export const NATIONAL_STATS = {
-  politiciansTracked: { value: 1248, change: '+12%', label: 'Total Politicians Tracked' },
+  politiciansTracked: { value: 2280, change: 'Live', label: 'Total Politicians Tracked' },
   projectsMonitored: { value: 8732, change: '+18%', label: 'Total Projects Monitored' },
   budgetTracked: { value: '₱ 1.24T', change: '+15%', label: 'Total Budget Tracked' },
-  citizenVotes: { value: '2.8M', change: '+32%', label: 'Total Citizen Votes' }
+  citizenVotes: { value: '0', change: 'Live SSE', label: 'Total Citizen Votes' }
 };
 
 export const SECTOR_COUNTS = [

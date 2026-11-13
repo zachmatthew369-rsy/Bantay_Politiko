@@ -13,13 +13,32 @@ export type SectorType =
   | 'Agriculture'
   | 'Others';
 
+export type PoliticianRoleCategory =
+  | 'President'
+  | 'Senator'
+  | 'Congressman'
+  | 'Governor'
+  | 'Mayor'
+  | 'Councilor'
+  | 'Brgy Official';
+
+export interface PoliticianContactInfo {
+  officeAddress?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+}
+
 export interface Politician {
   id: string;
+  roleCategory: PoliticianRoleCategory;
   name: string;
   honorific: string;
   position: string;
   jurisdiction: string;
   region: string;
+  district?: string | null;
+  partyList?: string | null;
   politicalAffiliation: string;
   currentTerm: string;
   isVerified: boolean;
@@ -29,14 +48,27 @@ export interface Politician {
   totalProjects: number;
   totalBudgetAllocated: string;
   publicOfficeHistory: string[];
+  committees?: string[];
+  contactInfo?: PoliticianContactInfo;
+  sourceName?: string;
+  sourceUrl?: string;
+  lastVerifiedDate?: string;
   sentiment: {
     corruptVotes: number;
     notCorruptVotes: number;
+    undecidedVotes?: number;
     supportivePercent: number;
     concernedPercent: number;
     undecidedPercent: number;
     totalResponses: number;
     lastUpdated: string;
+    history?: {
+      timestamp: string;
+      supportivePercent: number;
+      concernedPercent: number;
+      undecidedPercent: number;
+      totalResponses: number;
+    }[];
   };
   verifiedRecords: {
     coaAuditFindings: number;
