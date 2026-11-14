@@ -15,7 +15,20 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+const portArgIdx = process.argv.indexOf('--port');
+const cliPort =
+  portArgIdx !== -1 && process.argv[portArgIdx + 1]
+    ? parseInt(process.argv[portArgIdx + 1], 10)
+    : NaN;
+const envPort = process.env.PORT ? parseInt(process.env.PORT, 10) : NaN;
+const defaultAppPort = process.env.DEFAULT_APP_PORT ? parseInt(process.env.DEFAULT_APP_PORT, 10) : NaN;
+const PORT = Number.isFinite(cliPort)
+  ? cliPort
+  : Number.isFinite(defaultAppPort)
+  ? defaultAppPort
+  : Number.isFinite(envPort) && envPort !== 8080
+  ? envPort
+  : 3000;
 const POLITICIANS_JSON_PATH = path.resolve(__dirname, 'scraper', 'cache', 'politicians_live.json');
 const SCRAPER_SCRIPT_PATH = path.resolve(__dirname, 'scraper', 'scrape_politicians.py');
 const SENTIMENT_LEDGER_PATH = path.resolve(__dirname, 'scraper', 'cache', 'sentiment_ledger.json');
@@ -303,6 +316,10 @@ CORE ARCHITECTURAL RULES:
    - Commission on Audit (COA) Audit Observation Memorandums (AOM) vs Notices of Disallowance (ND)
    - Statement of Assets, Liabilities, and Net Worth (SALN) under RA 6713
    - Official Directories: Office of the President, Senate of the Philippines (20th Congress), House of Representatives, DBM Philippine Government Directory, DILG / Liga ng mga Barangay, and FOI Local Government portals.`;
+
+app.get('/api/health', (_req, res) => {
+  return res.json({ status: 'ok', port: PORT });
+});
 
 // GET /api/politicians - Serves real-time Scrapling-populated directory of the 7 requested categories
 app.get('/api/politicians', (req, res) => {
@@ -832,25 +849,60 @@ Ask me about any official by name, province, city, or congressional district!`;
 // Configure Vite integration for dev server or static files for production
 async function startServer() {
   const isProd = process.env.NODE_ENV === 'production';
+  const disableHmr = process.env.DISABLE_HMR === 'true';
 
   if (!isProd) {
-    const { createServer: createViteServer } = await import('vite');
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: 'spa',
+    let viteMiddleware: any = null;
+    const viteReady = import('vite')
+      .then(({ createServer: createViteServer }) =>
+        createViteServer({
+          server: {
+            middlewareMode: true,
+            allowedHosts: true as const,
+            hmr: !disableHmr,
+            ws: disableHmr ? (false as const) : undefined,
+          },
+          appType: 'spa',
+        })
+      )
+      .then((vite) => {
+        viteMiddleware = vite.middlewares;
+        return vite;
+      })
+      .catch((err) => {
+        console.error('Failed to initialize Vite dev middleware:', err);
+        throw err;
+      });
+
+    app.use(async (req, res, next) => {
+      try {
+        if (!viteMiddleware) {
+          await viteReady;
+        }
+        return viteMiddleware(req, res, next);
+      } catch (err) {
+        next(err);
+      }
     });
-    app.use(vite.middlewares);
   } else {
     const distPath = path.resolve(__dirname, 'dist');
     app.use(express.static(distPath));
-    app.get('*', (req, res) => {
+    app.get('*', (_req, res) => {
       res.sendFile(path.resolve(distPath, 'index.html'));
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
+  const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`BantayPolitiko Full-Stack Server listening on port ${PORT}`);
+  });
+
+  server.on('error', (err) => {
+    console.error(`Server failed to bind port ${PORT}:`, err);
+    process.exit(1);
   });
 }
 
-startServer();
+startServer().catch((err) => {
+  console.error('Fatal server startup error:', err);
+  process.exit(1);
+});
